@@ -1,0 +1,16 @@
+<div class="uk-grid">
+    <div class="uk-width-1-4">
+        <figure class="uk-overlay" v-show="activeImage.src">
+            <img v-attr="src: activeImage.src" alt="{{ activeImage.filename }}" width="100" height="150">
+            <figcaption class="uk-overlay-panel">{{ activeImage.title }}</figcaption>
+        </figure>
+
+
+    </div>
+    <div class="uk-width-3-4">
+    </div>
+</div>
+<div class="uk-margin">
+    <library when-selected="{{ setActiveImage }}"></library>
+</div>
+<pre>{{ $data | json }}</pre>
