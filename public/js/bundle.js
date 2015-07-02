@@ -21900,7 +21900,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	exports.install = function (Vue, options) {
+	exports.install = function (Vue) {
 
 	    function guid() {
 	        function s4() {
@@ -21916,84 +21916,45 @@
 	            text: ''
 	        },
 
-	        Layer = function Layer(type, data) {
-	            this.data = _.extend(layerDataDefaults, data);
+	        Layer = function Layer(type) {
 	            this.id = guid();
 	            this.title = type + ' layer';
 	            this.type = type;
 	            this.ordering = 0;
 	            this.fObj = null;
-	            this.setFabricObject();
 	        };
 
 	    _.extend(Layer.prototype, {
 	        setFabricObject: function () {
-	            switch (this.type) {
-	            case 'rectangle':
-	                this.fObj = new fabric.Rect({
-	                    top: 110,
-	                    left: 100,
-	                    width: 60,
-	                    height: 70,
-	                    fill: 'blue'
-	                });
-	                break;
-	            case 'triangle':
-	                this.fObj = new fabric.Triangle({
-	                    top: 100,
-	                    left: 120,
-	                    width: 60,
-	                    height: 70,
-	                    fill: 'red'
-	                });
-	                break;
-	            case 'circle':
-	                this.fObj = new fabric.Circle({
-	                    top: 80,
-	                    left: 100,
-	                    radius: 30,
-	                    fill: 'yellow'
-	                });
-	                break;
-	            case 'text':
-	                this.fObj = new fabric.Text(this.data.text, {
-	                    left: 10,
-	                    top: 10
-	                });
-	                break;
-	            case 'image':
-	                var img = document.createElement('img');
-	                img.src = this.data.url;
-	                this.fObj = new fabric.Image(img, {
+	            if (typeof this.onSetFabricObject === 'function') {
+	                this.onSetFabricObject();
+	            } else {
+	                this.fObj = new fabric.Text('No object set', {
 	                    left: 10,
 	                    top: 10,
-	                    width: 120,
-	                    height: 120
+	                    fill: 'red'
 	                });
-	                break;
 	            }
-
 	        },
 	        updateValue: function (controlType) {
-	            console.log(controlType);
-	            switch (controlType) {
-	            case 'angle':
-	                this.fObj.setAngle(this.fObj.angle);
-	                break;
-	            case 'text':
-	                this.title = this.fObj.text.substr(0, 15);
-	                break;
-	            case 'fontFamily':
-	                //this.fObj.setFontFamily(this.fObj.fontFamily);
-	                break;
+
+	            if (controlType === 'angle') {
+	                this.fObj.setAngle(this.fObj.angle); //todo still not works
+	            }
+
+	            if (typeof this.onUpdateValue === 'function') {
+	                this.onUpdateValue(controlType);
 	            }
 	            this.fObj.setCoords();
 	        }
 
 	    });
 
-	    Vue.prototype.$getLayer = function (type, options) {
-	        return new Layer(type, options);
+	    Vue.prototype.$getLayer = function (type, layerObj) {
+	        var layer = new Layer(type, layerObj);
+	        _.extend(layer, layerObj);
+	        layer.setFabricObject();
+	        return layer;
 	    };
 	};
 
@@ -22039,11 +22000,12 @@
 	        this.canvas = new fabric.Canvas(this.$$.canvas);
 	        this.canvas.setBackgroundColor('white');
 	        this.canvas.on({
-	            'selection:cleared': this.clearSelection,
-	            'object:moving': this.updateControls,
-	            'object:scaling': this.updateControls,
-	            'object:resizing': this.updateControls,
-	            'object:rotating': this.updateControls
+	            'selection:cleared': this.clearActiveLayer,
+	            'object:selected': this.setActiveLayer,
+	            //'object:moving': this.setActiveLayer,
+	            'object:scaling': this.updateControls
+	            //'object:resizing': this.setActiveLayer,
+	            //'object:rotating': this.setActiveLayer
 	        });
 	        this.updateCanvas();
 	    },
@@ -22075,25 +22037,35 @@
 	        /**
 	         * canvasobjects have been altered, set activeLayer
 	         */
-	        updateControls: function () {
+	        setActiveLayer: function () {
 	            var activeObject = this.canvas.getActiveObject();
 	            _.forEach(this.layers, function (layer) {
-	                //console.log(layer.fObj.active);
-	                //console.log(layer.type);
 	                if (activeObject === layer.fObj) {
 	                    this.$set('activeLayerId', layer.id);
 	                }
 	            }.bind(this));
 	        },
-	        clearSelection: function () {
+	        /**
+	         * clear selected layers
+	         */
+	        clearActiveLayer: function () {
 	            this.activeLayerId = '';
+	        },
+	        updateControls: function (e) {
+	            var fObj = e.target;
+	            if (this.activeLayer.fObj === fObj) { //just to make sure
+	                //this.activeLayer.fObj.scaleX = fObj.getScaleX();
+	                //this.activeLayer.fObj.scaleY = fObj.getScaleY();
+	                console.log(fObj.scaleX, fObj.scaleY);
+	                console.log(this.activeLayer.fObj.scaleX, this.activeLayer.fObj.scaleY);
+	            }
 	        },
 	        _removeLayer: function (layer) {
 	            this.layers = _.remove(this.layers, function (n) {
 	                return n.id !== layer.id;
 	            });
 	            if (layer.id === this.activeLayerId) {
-	                this.clearSelection();
+	                this.clearActiveLayer();
 	            }
 	            this.canvas.fxRemove(layer.fObj);
 	        },
@@ -22144,7 +22116,7 @@
 /* 8 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"uk-panel uk-panel-box\"\n     v-show=\"activeLayer.type\"\n        >\n    <h3 class=\"uk-panel-title\">{{ activeLayer.title}}</h3>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-width\">Width</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-width\"\n                   v-model=\"activeLayer.fObj.width\"\n                   v-on=\"input: updateValue('width')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-height\">Height</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-height\"\n                   v-model=\"activeLayer.fObj.height\"\n                   v-on=\"input: updateValue('height')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-top\">Top</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-top\" min=\"0\" max=\"{{ canvasOptions.height }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.top\"\n                   v-on=\"input: updateValue('top')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-left\">Left</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-left\" min=\"0\" max=\"{{ canvasOptions.width }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.left\"\n                   v-on=\"input: updateValue('left')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scalex\">Scale X</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scalex\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleX\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scaley\">Scale Y</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scaley\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleY\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'rectangle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-angle\">Angle</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-angle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.angle\"\n                   v-on=\"input: updateValue('angle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-endangle\">Angle c</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-endangle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.endAngle\"\n                   v-on=\"input: updateValue('endAngle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-radius\">Radius</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-radius\" min=\"0\" max=\"500\" step=\"1\"\n                   v-model=\"activeLayer.fObj.radius\"\n                   v-on=\"input: updateValue('radius')\"\n                   number>\n        </div>\n    </div>\n\n</div>\n\n\n";
+	module.exports = "\n<div class=\"uk-panel uk-panel-box\"\n     v-show=\"activeLayer.type\"\n        >\n    <h3 class=\"uk-panel-title\">{{ activeLayer.title}}</h3>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-width\">Width</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-width\"\n                   v-model=\"activeLayer.fObj.width\"\n                   v-on=\"input: updateValue('width')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-height\">Height</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-height\"\n                   v-model=\"activeLayer.fObj.height\"\n                   v-on=\"input: updateValue('height')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-opacity\">Opacity</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-opacity\" min=\"0\" max=\"1\" step=\"0.01\"\n                   v-model=\"activeLayer.fObj.opacity\"\n                   v-on=\"input: updateValue('opacity')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-top\">Top</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-top\" min=\"0\" max=\"{{ canvasOptions.height }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.top\"\n                   v-on=\"input: updateValue('top')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-left\">Left</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-left\" min=\"0\" max=\"{{ canvasOptions.width }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.left\"\n                   v-on=\"input: updateValue('left')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scalex\">Scale X</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scalex\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleX\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scaley\">Scale Y</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scaley\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleY\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'rectangle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-angle\">Angle</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-angle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.angle\"\n                   v-on=\"input: updateValue('angle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-endangle\">Angle c</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-endangle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.endAngle\"\n                   v-on=\"input: updateValue('endAngle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-radius\">Radius</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-radius\" min=\"0\" max=\"500\" step=\"1\"\n                   v-model=\"activeLayer.fObj.radius\"\n                   v-on=\"input: updateValue('radius')\"\n                   number>\n        </div>\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
 /* 9 */
@@ -22247,9 +22219,46 @@
 	    methods: {
 
 	        addFigure: function (figure) {
-	            var obj = this.$getLayer(figure.type);
 
-	            this._addLayer(obj);
+	            this._addLayer(this.getLayerObject(figure));
+
+	        },
+
+	        getLayerObject: function (figure) {
+
+	            return this.$getLayer(figure.type, {
+	                onSetFabricObject: function () {
+	                    switch (this.type) {
+	                    case 'rectangle':
+	                        this.fObj = new fabric.Rect({
+	                            top: 110,
+	                            left: 100,
+	                            width: 60,
+	                            height: 70,
+	                            fill: 'blue'
+	                        });
+	                        break;
+	                    case 'triangle':
+	                        this.fObj = new fabric.Triangle({
+	                            top: 100,
+	                            left: 120,
+	                            width: 60,
+	                            height: 70,
+	                            fill: 'red'
+	                        });
+	                        break;
+	                    case 'circle':
+	                        this.fObj = new fabric.Circle({
+	                            top: 80,
+	                            left: 100,
+	                            radius: 30,
+	                            fill: 'yellow'
+	                        });
+	                        break;
+	                    }
+	                }
+	            });
+
 	        }
 	    }
 	};
@@ -22272,6 +22281,7 @@
 
 	    data: function () {
 	        return {
+	            defaultText: 'Text',
 	            fonts: [
 	                {
 	                    value: 'Times New Roman',
@@ -22312,8 +22322,18 @@
 	    methods: {
 
 	        addText: function () {
-	            var obj = this.$getLayer('text', {
-	                text: 'Text'
+	            var $this = this, obj = this.$getLayer('text', {
+	                onSetFabricObject: function () {
+	                    this.fObj = new fabric.Text($this.defaultText, {
+	                        left: 10,
+	                        top: 10
+	                    });
+	                },
+	                onUpdateValue: function (controlType) {
+	                    if (controlType === 'text') {
+	                        this.title = this.fObj.text.substr(0, 15);
+	                    }
+	                }
 	            });
 
 	            this._addLayer(obj);
@@ -22346,8 +22366,17 @@
 	    methods: {
 
 	        addImage: function () {
-	            var obj = this.$getLayer('image', {
-	                url: this.activeAsset.url
+	            var $this = this, obj = this.$getLayer('image', {
+	                onSetFabricObject: function () {
+	                    var img = document.createElement('img');
+	                    img.src = $this.activeAsset.url;
+	                    this.fObj = new fabric.Image(img, {
+	                        left: 10,
+	                        top: 10,
+	                        width: 120,
+	                        height: 120
+	                    });
+	                }
 	            });
 
 	            this._addLayer(obj);

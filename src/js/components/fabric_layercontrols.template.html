@@ -25,6 +25,16 @@
     </div>
 
     <div class="uk-form-row">
+        <label class="uk-form-label" for="layercontrol-opacity">Opacity</label>
+        <div class="uk-form-controls">
+            <input type="range" id="layercontrol-opacity" min="0" max="1" step="0.01"
+                   v-model="activeLayer.fObj.opacity"
+                   v-on="input: updateValue('opacity')"
+                   number>
+        </div>
+    </div>
+
+    <div class="uk-form-row">
         <label class="uk-form-label" for="layercontrol-top">Top</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-top" min="0" max="{{ canvasOptions.height }}" step="1"

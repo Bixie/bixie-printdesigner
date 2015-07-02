@@ -1,4 +1,4 @@
-exports.install = function (Vue, options) {
+exports.install = function (Vue) {
 
     function guid() {
         function s4() {
@@ -14,83 +14,44 @@ exports.install = function (Vue, options) {
             text: ''
         },
 
-        Layer = function Layer(type, data) {
-            this.data = _.extend(layerDataDefaults, data);
+        Layer = function Layer(type) {
             this.id = guid();
             this.title = type + ' layer';
             this.type = type;
             this.ordering = 0;
             this.fObj = null;
-            this.setFabricObject();
         };
 
     _.extend(Layer.prototype, {
         setFabricObject: function () {
-            switch (this.type) {
-            case 'rectangle':
-                this.fObj = new fabric.Rect({
-                    top: 110,
-                    left: 100,
-                    width: 60,
-                    height: 70,
-                    fill: 'blue'
-                });
-                break;
-            case 'triangle':
-                this.fObj = new fabric.Triangle({
-                    top: 100,
-                    left: 120,
-                    width: 60,
-                    height: 70,
-                    fill: 'red'
-                });
-                break;
-            case 'circle':
-                this.fObj = new fabric.Circle({
-                    top: 80,
-                    left: 100,
-                    radius: 30,
-                    fill: 'yellow'
-                });
-                break;
-            case 'text':
-                this.fObj = new fabric.Text(this.data.text, {
-                    left: 10,
-                    top: 10
-                });
-                break;
-            case 'image':
-                var img = document.createElement('img');
-                img.src = this.data.url;
-                this.fObj = new fabric.Image(img, {
+            if (typeof this.onSetFabricObject === 'function') {
+                this.onSetFabricObject();
+            } else {
+                this.fObj = new fabric.Text('No object set', {
                     left: 10,
                     top: 10,
-                    width: 120,
-                    height: 120
+                    fill: 'red'
                 });
-                break;
             }
-
         },
         updateValue: function (controlType) {
-            console.log(controlType);
-            switch (controlType) {
-            case 'angle':
-                this.fObj.setAngle(this.fObj.angle);
-                break;
-            case 'text':
-                this.title = this.fObj.text.substr(0, 15);
-                break;
-            case 'fontFamily':
-                //this.fObj.setFontFamily(this.fObj.fontFamily);
-                break;
+
+            if (controlType === 'angle') {
+                this.fObj.setAngle(this.fObj.angle); //todo still not works
+            }
+
+            if (typeof this.onUpdateValue === 'function') {
+                this.onUpdateValue(controlType);
             }
             this.fObj.setCoords();
         }
 
     });
 
-    Vue.prototype.$getLayer = function (type, options) {
-        return new Layer(type, options);
+    Vue.prototype.$getLayer = function (type, layerObj) {
+        var layer = new Layer(type, layerObj);
+        _.extend(layer, layerObj);
+        layer.setFabricObject();
+        return layer;
     };
 };

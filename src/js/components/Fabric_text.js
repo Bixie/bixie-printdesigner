@@ -6,6 +6,7 @@ module.exports = {
 
     data: function () {
         return {
+            defaultText: 'Text',
             fonts: [
                 {
                     value: 'Times New Roman',
@@ -46,8 +47,18 @@ module.exports = {
     methods: {
 
         addText: function () {
-            var obj = this.$getLayer('text', {
-                text: 'Text'
+            var $this = this, obj = this.$getLayer('text', {
+                onSetFabricObject: function () {
+                    this.fObj = new fabric.Text($this.defaultText, {
+                        left: 10,
+                        top: 10
+                    });
+                },
+                onUpdateValue: function (controlType) {
+                    if (controlType === 'text') {
+                        this.title = this.fObj.text.substr(0, 15);
+                    }
+                }
             });
 
             this._addLayer(obj);

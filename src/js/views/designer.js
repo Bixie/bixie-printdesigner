@@ -35,11 +35,12 @@ module.exports = {
         this.canvas = new fabric.Canvas(this.$$.canvas);
         this.canvas.setBackgroundColor('white');
         this.canvas.on({
-            'selection:cleared': this.clearSelection,
-            'object:moving': this.updateControls,
-            'object:scaling': this.updateControls,
-            'object:resizing': this.updateControls,
-            'object:rotating': this.updateControls
+            'selection:cleared': this.clearActiveLayer,
+            'object:selected': this.setActiveLayer,
+            //'object:moving': this.setActiveLayer,
+            'object:scaling': this.updateControls
+            //'object:resizing': this.setActiveLayer,
+            //'object:rotating': this.setActiveLayer
         });
         this.updateCanvas();
     },
@@ -71,25 +72,35 @@ module.exports = {
         /**
          * canvasobjects have been altered, set activeLayer
          */
-        updateControls: function () {
+        setActiveLayer: function () {
             var activeObject = this.canvas.getActiveObject();
             _.forEach(this.layers, function (layer) {
-                //console.log(layer.fObj.active);
-                //console.log(layer.type);
                 if (activeObject === layer.fObj) {
                     this.$set('activeLayerId', layer.id);
                 }
             }.bind(this));
         },
-        clearSelection: function () {
+        /**
+         * clear selected layers
+         */
+        clearActiveLayer: function () {
             this.activeLayerId = '';
+        },
+        updateControls: function (e) {
+            var fObj = e.target;
+            if (this.activeLayer.fObj === fObj) { //just to make sure
+                //this.activeLayer.fObj.scaleX = fObj.getScaleX();
+                //this.activeLayer.fObj.scaleY = fObj.getScaleY();
+                console.log(fObj.scaleX, fObj.scaleY);
+                console.log(this.activeLayer.fObj.scaleX, this.activeLayer.fObj.scaleY);
+            }
         },
         _removeLayer: function (layer) {
             this.layers = _.remove(this.layers, function (n) {
                 return n.id !== layer.id;
             });
             if (layer.id === this.activeLayerId) {
-                this.clearSelection();
+                this.clearActiveLayer();
             }
             this.canvas.fxRemove(layer.fObj);
         },
