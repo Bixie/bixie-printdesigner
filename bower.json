@@ -1,0 +1,15 @@
+{
+  "name": "bixie-printdesigner",
+  "directory" : "/vendor",
+  "dependencies": {
+    "lodash": "~3.9.0",
+    "uikit": "#master",
+    "vue": "~0.12.1",
+    "vue-resource": "~0.1.0"
+  },
+  "devDependencies": {
+    "globalize": "~1.0.0",
+    "js-md5": "~1.1.0"
+  },
+  "private": true
+}
