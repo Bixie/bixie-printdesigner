@@ -1,13 +1,14 @@
 module.exports = {
+
     template: require('./library.template.html'),
 
-    props: ['when-selected'],
+    inherit: true,
 
     data: function () {
         return {
             images: [
                 {
-                    title: 'Image 1',
+                    title: 'Image 51',
                     filename: 'image1.jpg',
                     src: 'images/Screenshot_51.png',
                     url: 'images/Screenshot_51.png'
@@ -27,7 +28,7 @@ module.exports = {
     methods: {
         selectImage: function (image, e) {
             e.preventDefault();
-            this.whenSelected(image);
+            this.setActiveAsset(image);
         }
     }
 };

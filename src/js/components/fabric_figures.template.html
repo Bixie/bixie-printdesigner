@@ -1,0 +1,35 @@
+<div class="uk-grid uk-grid-small">
+    <div class="uk-width-1-3">
+
+        <div class="uk-button-group">
+
+            <button type="button" class="uk-button" v-repeat="figure: figures" v-on="click: addFigure(figure)"><i
+                    class="uk-icon-plus uk-margin-small-right"></i>{{ figure.label }}
+            </button>
+
+        </div>
+
+    </div>
+    <div class="uk-width-2-3">
+
+        <div class="uk-form-horizontal"
+             v-show="activeLayer.type">
+
+            <div class="uk-form-row">
+                <label class="uk-form-label" for="layercontrol-fill">Color</label>
+
+                <div class="uk-form-controls">
+                    <input type="text" id="layercontrol-fill"
+                           v-model="activeLayer.fObj.fill"
+                           v-on="input: updateValue('fill')">
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+

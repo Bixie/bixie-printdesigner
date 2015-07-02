@@ -1,0 +1,31 @@
+
+<ul class="uk-sortable uk-list uk-list-line uk-form"
+    data-uk-sortable="{handleClass:'uk-sortable-handle', threshold: 1}">
+    <li data-id="{{ layer.id }}"
+        v-repeat="layer: layers | orderBy 'ordering' true">
+        <div v-on="click: selectLayer(layer)" class="uk-panel" v-class="uk-panel-box-primary: layer.id == activeLayerId">
+
+            <div class="uk-grid uk-grid-small uk-flex uk-flex-middle">
+                <div class="uk-width-1-6 uk-text-center">
+                    <button type="button" class="uk-button uk-button-mini uk-sortable-handle"><i
+                            class="uk-icon-bars"></i></button>
+                </div>
+                <div class="uk-width-5-6">
+
+                    <input type="text" class="uk-form-blank uk-width-1-1"
+                           v-model="layer.title"/>
+
+                </div>
+            </div>
+
+            <div class="uk-width-1-1 uk-text-right">
+                {{layer.ordering}}
+                <button type="button" class="uk-button uk-button-danger uk-button-mini"
+                        v-on="click: removeLayer(layer)"
+                        ><i class="uk-icon-trash-o"></i></button>
+            </div>
+
+        </div>
+
+    </li>
+</ul>

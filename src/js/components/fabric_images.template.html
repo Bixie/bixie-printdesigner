@@ -1,0 +1,36 @@
+<div class="uk-grid uk-grid-small">
+    <div class="uk-width-1-3">
+
+        <div class="uk-button-group">
+
+            <button type="button" class="uk-button"
+                    v-show="activeAsset.src"
+                    v-on="click: addImage"><i
+                    class="uk-icon-plus uk-margin-small-right"></i>Image
+            </button>
+
+        </div>
+
+    </div>
+    <div class="uk-width-2-3">
+
+        <div class="uk-width-1-1">
+            <figure class="uk-overlay"
+                    v-show="activeAsset.src">
+                <img v-attr="src: activeAsset.src" alt="{{ activeAsset.filename }}" width="200" height="500">
+                <figcaption class="uk-overlay-panel">{{ activeAsset.title }}</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="uk-form-horizontal"
+             v-show="activeLayer.type">
+
+
+        </div>
+
+    </div>
+
+</div>
+
+

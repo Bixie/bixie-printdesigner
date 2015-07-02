@@ -1,16 +1,64 @@
-<div class="uk-grid">
-    <div class="uk-width-1-4">
-        <figure class="uk-overlay" v-show="activeImage.src">
-            <img v-attr="src: activeImage.src" alt="{{ activeImage.filename }}" width="100" height="150">
-            <figcaption class="uk-overlay-panel">{{ activeImage.title }}</figcaption>
-        </figure>
-
-
-    </div>
-    <div class="uk-width-3-4">
-    </div>
-</div>
 <div class="uk-margin">
-    <library when-selected="{{ setActiveImage }}"></library>
+    <div class="uk-width-1-1">
+
+        <ul class="uk-tab" data-uk-tab="{connect:'#tools-switcher'}">
+            <li><a href="#"><i class="uk-icon-pencil"></i></a></li>
+            <li><a href="#"><i class="uk-icon-font"></i></a></li>
+            <li><a href="#"><i class="uk-icon-image"></i></a></li>
+        </ul>
+
+        <ul id="tools-switcher" class="uk-switcher uk-margin">
+            <li>
+                <fabric_figures></fabric_figures>
+            </li>
+            <li>
+                <fabric_text></fabric_text>
+            </li>
+            <li>
+                <fabric_images></fabric_images>
+            </li>
+        </ul>
+
+
+    </div>
 </div>
+
+
+<div class="uk-grid uk-grid-small">
+
+    <div class="uk-width-medium-1-4 uk-width-large-1-5">
+        <div class="uk-width-1-1">
+
+            <fabric_layercontrols></fabric_layercontrols>
+
+        </div>
+
+    </div>
+
+    <div class="uk-width-medium-2-4 uk-width-large-3-5">
+
+        <div class="uk-panel uk-panel-box">
+
+            <canvas v-el="canvas" width="{{ canvasOptions.width }}" height="{{ canvasOptions.height }}"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <div class="uk-width-medium-1-4 uk-width-large-1-5">
+        <div class="uk-width-1-1">
+            <fabric_layerselect></fabric_layerselect>
+        </div>
+
+    </div>
+</div>
+
+<div class="uk-margin">
+
+    <library></library>
+
+</div>
+
+<pre>{{ $data.activeLayer.fObj | json }}</pre>
 <pre>{{ $data | json }}</pre>
