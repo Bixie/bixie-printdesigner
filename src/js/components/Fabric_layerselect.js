@@ -9,6 +9,11 @@ module.exports = {
         };
     },
 
+    load: function () {
+        //require('uikit/js/components/sortable'); //todo
+
+    },
+
     ready: function () {
         var $this = this;
 

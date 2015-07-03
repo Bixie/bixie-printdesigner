@@ -1,5 +1,5 @@
 var Vue = require('vue'),
-    UIkit = window.UIkit, //todo why can't I require UIKit/jQuery???
+    UIkit = require('uikit/js/uikit'),//todo works here, but not for components
     _ = require('lodash');
 
 Vue.use(require('./vue'));
@@ -15,4 +15,5 @@ new Vue({
     components: {
         'designer-view': require('./views/designer')
     }
+
 })
