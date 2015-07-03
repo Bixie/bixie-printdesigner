@@ -1,6 +1,6 @@
 module.exports = {
 
-    template: require('./library.template.html'),
+    template: require('../templates/library.template.html'),
 
     inherit: true,
 

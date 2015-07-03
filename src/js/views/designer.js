@@ -1,6 +1,6 @@
 module.exports = {
 
-    template: require('./designer.template.html'),
+    template: require('../templates/designer.template.html'),
 
     data: function () {
         return {

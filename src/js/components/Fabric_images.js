@@ -1,6 +1,6 @@
 module.exports = {
 
-    template: require('./fabric_images.template.html'),
+    template: require('../templates/fabric_images.template.html'),
 
     inherit: true,
 

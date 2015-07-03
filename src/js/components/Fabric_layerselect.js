@@ -1,6 +1,6 @@
 module.exports = {
 
-    template: require('./fabric_layerselect.template.html'),
+    template: require('../templates/fabric_layerselect.template.html'),
 
     inherit: true,
 
