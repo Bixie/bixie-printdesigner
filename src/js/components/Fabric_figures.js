@@ -9,15 +9,15 @@ module.exports = {
             figures: [
                 {
                     type: 'rectangle',
-                    label: 'Rectangle'
+                    label: this.$trans('Rechthoek')
                 },
                 {
                     type: 'triangle',
-                    label: 'Triangle'
+                    label: this.$trans('Driekhoek')
                 },
                 {
                     type: 'circle',
-                    label: 'Circle'
+                    label: this.$trans('Cirkel')
                 }
             ]
         };

@@ -50,15 +50,6 @@
 
 	Vue.use(__webpack_require__(4));
 
-	//Vue.use(require('vue-resource')); //todo throws error plugin.apply is not a function, see below
-	/**
-	 * if (typeof plugin.install === 'function') {
-	 *    plugin.install.apply(plugin, args)
-	 *  } else {
-	 *    plugin.apply(null, args)
-	 *  }
-	 */
-
 	new Vue({
 
 	    el: '#main',
@@ -68,7 +59,7 @@
 	    },
 
 	    components: {
-	        'designer-view': __webpack_require__(5)
+	        'designer-view': __webpack_require__(16)
 	    }
 	})
 
@@ -77,7 +68,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * Vue.js v0.12.4
+	 * Vue.js v0.12.5
 	 * (c) 2015 Evan You
 	 * Released under the MIT License.
 	 */
@@ -233,7 +224,7 @@
 	/* 1 */
 	/***/ function(module, exports, __webpack_require__) {
 
-		var lang   = __webpack_require__(4)
+		var lang = __webpack_require__(4)
 		var extend = lang.extend
 
 		extend(exports, lang)
@@ -242,6 +233,7 @@
 		extend(exports, __webpack_require__(2))
 		extend(exports, __webpack_require__(7))
 		extend(exports, __webpack_require__(8))
+
 
 	/***/ },
 	/* 2 */
@@ -258,11 +250,8 @@
 		 */
 
 		exports.assertProp = function (prop, value) {
-		  var assertions = prop.assertions
-		  if (!assertions) {
-		    return true
-		  }
-		  var type = assertions.type
+		  var options = prop.options
+		  var type = options.type
 		  var valid = true
 		  var expectedType
 		  if (type) {
@@ -297,7 +286,7 @@
 		    )
 		    return false
 		  }
-		  var validator = assertions.validator
+		  var validator = options.validator
 		  if (validator) {
 		    if (!validator.call(null, value)) {
 		      _.warn(
@@ -584,7 +573,7 @@
 		 * @return {String}
 		 */
 		function toUpper (_, c) {
-		  return c ? c.toUpperCase () : ''
+		  return c ? c.toUpperCase() : ''
 		}
 
 		/**
@@ -713,10 +702,10 @@
 
 		exports.define = function (obj, key, val, enumerable) {
 		  Object.defineProperty(obj, key, {
-		    value        : val,
-		    enumerable   : !!enumerable,
-		    writable     : true,
-		    configurable : true
+		    value: val,
+		    enumerable: !!enumerable,
+		    writable: true,
+		    configurable: true
 		  })
 		}
 
@@ -729,9 +718,9 @@
 		 * @return {Function} - the debounced function
 		 */
 
-		exports.debounce = function(func, wait) {
+		exports.debounce = function (func, wait) {
 		  var timeout, args, context, timestamp, result
-		  var later = function() {
+		  var later = function () {
 		    var last = Date.now() - timestamp
 		    if (last < wait && last >= 0) {
 		      timeout = setTimeout(later, wait - last)
@@ -741,7 +730,7 @@
 		      if (!timeout) context = args = null
 		    }
 		  }
-		  return function() {
+		  return function () {
 		    context = this
 		    args = arguments
 		    timestamp = Date.now()
@@ -876,6 +865,7 @@
 		    timerFunc(handle, 0)
 		  }
 		})()
+
 
 	/***/ },
 	/* 6 */
@@ -1090,8 +1080,9 @@
 		    rawContent = asFragment
 		      ? document.createDocumentFragment()
 		      : document.createElement('div')
-		    /* jshint boss:true */
+		    /* eslint-disable no-cond-assign */
 		    while (child = el.firstChild) {
+		    /* eslint-enable no-cond-assign */
 		      rawContent.appendChild(child)
 		    }
 		  }
@@ -1135,7 +1126,7 @@
 		function enableDebug () {
 
 		  var hasConsole = typeof console !== 'undefined'
-		  
+
 		  /**
 		   * Log a message.
 		   *
@@ -1159,7 +1150,6 @@
 		      console.warn('[Vue warn]: ' + msg)
 		      /* istanbul ignore if */
 		      if (config.debug) {
-		        /* jshint debug: true */
 		        console.warn((e || new Error('Warning Stack Trace')).stack)
 		      }
 		    }
@@ -1433,6 +1423,33 @@
 		}
 
 		/**
+		 * Ensure all props option syntax are normalized into the
+		 * Object-based format.
+		 *
+		 * @param {Object} options
+		 */
+
+		function guardProps (options) {
+		  var props = options.props
+		  if (_.isPlainObject(props)) {
+		    options.props = Object.keys(props).map(function (key) {
+		      var val = props[key]
+		      if (!_.isPlainObject(val)) {
+		        val = { type: val }
+		      }
+		      val.name = key
+		      return val
+		    })
+		  } else if (_.isArray(props)) {
+		    options.props = props.map(function (prop) {
+		      return typeof prop === 'string'
+		        ? { name: prop }
+		        : prop
+		    })
+		  }
+		}
+
+		/**
 		 * Merge two option objects into a new one.
 		 * Core utility used in both instantiation and inheritance.
 		 *
@@ -1444,6 +1461,7 @@
 
 		exports.mergeOptions = function merge (parent, child, vm) {
 		  guardComponents(child.components)
+		  guardProps(child)
 		  var options = {}
 		  var key
 		  if (child.mixins) {
@@ -1621,6 +1639,7 @@
 		_.extend(exports, __webpack_require__(11))
 		_.extend(exports, __webpack_require__(26))
 
+
 	/***/ },
 	/* 11 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -1692,7 +1711,6 @@
 		      if (nodeLinkFn) nodeLinkFn(vm, el, host)
 		      if (childLinkFn) childLinkFn(vm, childNodes, host)
 		    }, vm)
-		    // 
 		    return makeUnlinkFn(vm, dirs)
 		  }
 		}
@@ -1715,22 +1733,22 @@
 		 * Linker functions return an unlink function that
 		 * tearsdown all directives instances generated during
 		 * the process.
-		 * 
+		 *
 		 * We create unlink functions with only the necessary
 		 * information to avoid retaining additional closures.
 		 *
 		 * @param {Vue} vm
 		 * @param {Array} dirs
-		 * @param {Vue} [parent]
-		 * @param {Array} [parentDirs]
+		 * @param {Vue} [context]
+		 * @param {Array} [contextDirs]
 		 * @return {Function}
 		 */
 
-		function makeUnlinkFn (vm, dirs, parent, parentDirs) {
+		function makeUnlinkFn (vm, dirs, context, contextDirs) {
 		  return function unlink (destroying) {
 		    teardownDirs(vm, dirs, destroying)
-		    if (parent && parentDirs) {
-		      teardownDirs(parent, parentDirs)
+		    if (context && contextDirs) {
+		      teardownDirs(context, contextDirs)
 		    }
 		  }
 		}
@@ -1773,7 +1791,7 @@
 		/**
 		 * Compile the root element of an instance.
 		 *
-		 * 1. attrs on parent container (parent scope)
+		 * 1. attrs on context container (context scope)
 		 * 2. attrs on the component template root node, if
 		 *    replace:true (child scope)
 		 *
@@ -1781,7 +1799,7 @@
 		 *
 		 * This function does compile and link at the same time,
 		 * since root linkers can not be reused. It returns the
-		 * unlink function for potential parent directives on the
+		 * unlink function for potential context directives on the
 		 * container.
 		 *
 		 * @param {Vue} vm
@@ -1790,10 +1808,10 @@
 		 * @return {Function}
 		 */
 
-		 exports.compileAndLinkRoot = function (vm, el, options) {
+		exports.compileAndLinkRoot = function (vm, el, options) {
 		  var containerAttrs = options._containerAttrs
 		  var replacerAttrs = options._replacerAttrs
-		  var parentLinkFn, replacerLinkFn
+		  var contextLinkFn, replacerLinkFn
 
 		  // only need to compile other attributes for
 		  // non-block instances
@@ -1803,7 +1821,7 @@
 		    if (options._asComponent) {
 		      // 2. container attributes
 		      if (containerAttrs) {
-		        parentLinkFn = compileDirectives(containerAttrs, options)
+		        contextLinkFn = compileDirectives(containerAttrs, options)
 		      }
 		      if (replacerAttrs) {
 		        // 3. replacer attributes
@@ -1815,13 +1833,13 @@
 		    }
 		  }
 
-		  // link parent dirs
-		  var parent = vm.$parent
-		  var parentDirs
-		  if (parent && parentLinkFn) {
-		    parentDirs = linkAndCapture(function () {
-		      parentLinkFn(parent, el)
-		    }, parent)
+		  // link context scope dirs
+		  var context = vm._context
+		  var contextDirs
+		  if (context && contextLinkFn) {
+		    contextDirs = linkAndCapture(function () {
+		      contextLinkFn(context, el)
+		    }, context)
 		  }
 
 		  // link self
@@ -1829,9 +1847,9 @@
 		    if (replacerLinkFn) replacerLinkFn(vm, el)
 		  }, vm)
 
-		  // return the unlink function that tearsdown parent
+		  // return the unlink function that tearsdown context
 		  // container directives.
-		  return makeUnlinkFn(vm, selfDirs, parent, parentDirs)
+		  return makeUnlinkFn(vm, selfDirs, context, contextDirs)
 		}
 
 		/**
@@ -1863,12 +1881,15 @@
 		 */
 
 		function compileElement (el, options) {
+		  var linkFn
 		  var hasAttrs = el.hasAttributes()
-		  // check element directives
-		  var linkFn = checkElementDirectives(el, options)
 		  // check terminal directives (repeat & if)
-		  if (!linkFn && hasAttrs) {
+		  if (hasAttrs) {
 		    linkFn = checkTerminalDirectives(el, options)
+		  }
+		  // check element directives
+		  if (!linkFn) {
+		    linkFn = checkElementDirectives(el, options)
 		  }
 		  // check component
 		  if (!linkFn) {
@@ -2040,7 +2061,7 @@
 		 * a props link function.
 		 *
 		 * @param {Element|DocumentFragment} el
-		 * @param {Array} propDescriptors
+		 * @param {Array} propOptions
 		 * @return {Function} propsLinkFn
 		 */
 
@@ -2049,20 +2070,13 @@
 		var literalValueRE = /^(true|false)$|^\d.*/
 		var identRE = __webpack_require__(23).identRE
 
-		function compileProps (el, propDescriptors) {
+		function compileProps (el, propOptions) {
 		  var props = []
-		  var i = propDescriptors.length
-		  var descriptor, name, assertions, value, path, prop, literal, single
+		  var i = propOptions.length
+		  var options, name, value, path, prop, literal, single
 		  while (i--) {
-		    descriptor = propDescriptors[i]
-		    // normalize prop string/descriptor
-		    if (typeof descriptor === 'object') {
-		      name = descriptor.name
-		      assertions = descriptor
-		    } else {
-		      name = descriptor
-		      assertions = null
-		    }
+		    options = propOptions[i]
+		    name = options.name
 		    // props could contain dashes, which will be
 		    // interpreted as minus calculations by the parser
 		    // so we need to camelize the path here
@@ -2088,7 +2102,7 @@
 		      name: name,
 		      raw: value,
 		      path: path,
-		      assertions: assertions,
+		      options: options,
 		      mode: propBindingModes.ONE_WAY
 		    }
 		    if (value !== null) {
@@ -2122,7 +2136,7 @@
 		          }
 		        }
 		      }
-		    } else if (assertions && assertions.required) {
+		    } else if (options && options.required) {
 		      _.warn('Missing required prop: ' + name)
 		    }
 		    props.push(prop)
@@ -2140,19 +2154,24 @@
 		function makePropsLinkFn (props) {
 		  return function propsLinkFn (vm, el) {
 		    var i = props.length
-		    var prop, path, value
+		    var prop, path, options, value
 		    while (i--) {
 		      prop = props[i]
 		      path = prop.path
+		      options = prop.options
 		      if (prop.raw === null) {
-		        // initialize undefined prop
-		        vm._data[path] = undefined
+		        // initialize absent prop
+		        vm._data[path] = options.type === Boolean
+		          ? false
+		          : options.hasOwnProperty('default')
+		            ? options.default
+		            : undefined
 		      } else if (prop.dynamic) {
 		        // dynamic prop
-		        if (vm.$parent) {
+		        if (vm._context) {
 		          if (prop.mode === propBindingModes.ONE_TIME) {
 		            // one time binding
-		            value = vm.$parent.$get(prop.parentPath)
+		            value = vm._context.$get(prop.parentPath)
 		            if (_.assertProp(prop, value)) {
 		              vm[path] = vm._data[path] = value
 		            }
@@ -2169,7 +2188,9 @@
 		        }
 		      } else {
 		        // literal, cast it and just set once
-		        value = _.toBoolean(_.toNumber(prop.raw))
+		        value = options.type === Boolean && prop.raw === ''
+		          ? true
+		          : _.toBoolean(_.toNumber(prop.raw))
 		        if (_.assertProp(prop, value)) {
 		          vm[path] = vm._data[path] = value
 		        }
@@ -2232,7 +2253,6 @@
 		    return skip
 		  }
 		  var value, dirName
-		  /* jshint boss: true */
 		  for (var i = 0, l = terminalDirectives.length; i < l; i++) {
 		    dirName = terminalDirectives[i]
 		    if ((value = _.attr(el, dirName)) !== null) {
@@ -2423,10 +2443,10 @@
 		var idSelectorCache = new Cache(1000)
 
 		var map = {
-		  _default : [0, '', ''],
-		  legend   : [1, '<fieldset>', '</fieldset>'],
-		  tr       : [2, '<table><tbody>', '</tbody></table>'],
-		  col      : [
+		  _default: [0, '', ''],
+		  legend: [1, '<fieldset>', '</fieldset>'],
+		  tr: [2, '<table><tbody>', '</tbody></table>'],
+		  col: [
 		    2,
 		    '<table><tbody></tbody><colgroup>',
 		    '</colgroup></table>'
@@ -2505,12 +2525,12 @@
 		    )
 		  } else {
 
-		    var tag    = tagMatch && tagMatch[1]
-		    var wrap   = map[tag] || map._default
-		    var depth  = wrap[0]
+		    var tag = tagMatch && tagMatch[1]
+		    var wrap = map[tag] || map._default
+		    var depth = wrap[0]
 		    var prefix = wrap[1]
 		    var suffix = wrap[2]
-		    var node   = document.createElement('div')
+		    var node = document.createElement('div')
 
 		    node.innerHTML = prefix + templateString.trim() + suffix
 		    while (depth--) {
@@ -2518,8 +2538,9 @@
 		    }
 
 		    var child
-		    /* jshint boss:true */
+		    /* eslint-disable no-cond-assign */
 		    while (child = node.firstChild) {
+		    /* eslint-enable no-cond-assign */
 		      frag.appendChild(child)
 		    }
 		  }
@@ -2552,8 +2573,9 @@
 		  var clone = exports.clone(node)
 		  var frag = document.createDocumentFragment()
 		  var child
-		  /* jshint boss:true */
+		  /* eslint-disable no-cond-assign */
 		  while (child = clone.firstChild) {
+		  /* eslint-enable no-cond-assign */
 		    frag.appendChild(child)
 		  }
 		  return frag
@@ -2677,6 +2699,7 @@
 		    : frag
 		}
 
+
 	/***/ },
 	/* 13 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -2716,8 +2739,8 @@
 
 		p.put = function (key, value) {
 		  var entry = {
-		    key:key,
-		    value:value
+		    key: key,
+		    value: value
 		  }
 		  this._keymap[key] = entry
 		  if (this.tail) {
@@ -2793,6 +2816,7 @@
 		}
 
 		module.exports = Cache
+
 
 	/***/ },
 	/* 14 */
@@ -2872,8 +2896,9 @@
 		  var tokens = []
 		  var lastIndex = tagRE.lastIndex = 0
 		  var match, index, value, first, oneTime, twoWay
-		  /* jshint boss:true */
+		  /* eslint-disable no-cond-assign */
 		  while (match = tagRE.exec(text)) {
+		  /* eslint-enable no-cond-assign */
 		    index = match.index
 		    // push text token
 		    if (index > lastIndex) {
@@ -3159,6 +3184,7 @@
 		  return dirs
 		}
 
+
 	/***/ },
 	/* 16 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -3177,7 +3203,7 @@
 		  bind: function () {
 
 		    var child = this.vm
-		    var parent = child.$parent
+		    var parent = child._context
 		    // passed in from compiler directly
 		    var prop = this._descriptor
 		    var childKey = prop.path
@@ -3468,7 +3494,6 @@
 		  }
 		}
 
-
 		/**
 		 * Recrusively traverse an object to evoke all converted
 		 * getters, so that every nested property inside the object
@@ -3510,7 +3535,7 @@
 		 * Type enums
 		 */
 
-		var ARRAY  = 0
+		var ARRAY = 0
 		var OBJECT = 1
 
 		/**
@@ -3904,12 +3929,13 @@
 		      index = _.indexOf(this, index)
 		    }
 		    if (index > -1) {
-		      this.splice(index, 1)
+		      return this.splice(index, 1)
 		    }
 		  }
 		)
 
 		module.exports = arrayMethods
+
 
 	/***/ },
 	/* 21 */
@@ -3997,6 +4023,7 @@
 		    }
 		  }
 		)
+
 
 	/***/ },
 	/* 22 */
@@ -4111,8 +4138,7 @@
 		function compileExpFns (exp, needSet) {
 		  if (improperKeywordsRE.test(exp)) {
 		    _.warn(
-		      'Avoid using reserved keywords in expression: '
-		      + exp
+		      'Avoid using reserved keywords in expression: ' + exp
 		    )
 		  }
 		  // reset state
@@ -4266,6 +4292,7 @@
 		    exp.slice(0, 5) !== 'Math.'
 		}
 
+
 	/***/ },
 	/* 23 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -4316,7 +4343,7 @@
 		    'number': ['inIndex', 'append'],
 		    "'": ['inSingleQuote', 'append', ''],
 		    '"': ['inDoubleQuote', 'append', ''],
-		    "ident": ['inIdent', 'append', '*']
+		    'ident': ['inIdent', 'append', '*']
 		  },
 
 		  'afterZero': {
@@ -4365,7 +4392,7 @@
 
 		  var code = ch.charCodeAt(0)
 
-		  switch(code) {
+		  switch (code) {
 		    case 0x5B: // [
 		    case 0x5D: // ]
 		    case 0x2E: // .
@@ -4390,13 +4417,15 @@
 		  }
 
 		  // a-z, A-Z
-		  if ((0x61 <= code && code <= 0x7A) ||
-		      (0x41 <= code && code <= 0x5A)) {
+		  if (
+		    (code >= 0x61 && code <= 0x7A) ||
+		    (code >= 0x41 && code <= 0x5A)
+		  ) {
 		    return 'ident'
 		  }
 
 		  // 1-9
-		  if (0x31 <= code && code <= 0x39) {
+		  if (code >= 0x31 && code <= 0x39) {
 		    return 'number'
 		  }
 
@@ -4418,14 +4447,14 @@
 		  var c, newChar, key, type, transition, action, typeMap
 
 		  var actions = {
-		    push: function() {
+		    push: function () {
 		      if (key === undefined) {
 		        return
 		      }
 		      keys.push(key)
 		      key = undefined
 		    },
-		    append: function() {
+		    append: function () {
 		      if (key === undefined) {
 		        key = newChar
 		      } else {
@@ -4870,10 +4899,10 @@
 		        return cached
 		      }
 		    }
-		    var vm = this.vm
-		    var el = templateParser.clone(this.el)
 		    if (this.Ctor) {
-		      var child = vm.$addChild({
+		      var parent = this._host || this.vm
+		      var el = templateParser.clone(this.el)
+		      var child = parent.$addChild({
 		        el: el,
 		        data: data,
 		        template: this.template,
@@ -4881,8 +4910,8 @@
 		        // linker can be cached for better performance.
 		        _linkerCachable: !this.template,
 		        _asComponent: true,
-		        _host: this._host,
-		        _isRouterView: this._isRouterView
+		        _isRouterView: this._isRouterView,
+		        _context: this.vm
 		      }, this.Ctor)
 		      if (this.keepAlive) {
 		        this.cache[this.ctorId] = child
@@ -4961,7 +4990,7 @@
 		  /**
 		   * Set childVM and parent ref
 		   */
-		  
+
 		  setCurrent: function (child) {
 		    this.childVM = child
 		    var refID = child._refID || this.refID
@@ -4990,6 +5019,7 @@
 		  unbind: function () {
 		    this.invalidatePending()
 		    this.unbuild()
+		    this.unsetCurrent()
 		    // destroy all keep-alive cached instances
 		    if (this.cache) {
 		      for (var key in this.cache) {
@@ -5077,11 +5107,12 @@
 		        frag.childNodes.length > 1 ||
 		        // non-element template
 		        replacer.nodeType !== 1 ||
-		        // when root node is <content>, <partial> or has
-		        // v-repeat, the instance could end up having
-		        // multiple top-level nodes, thus becoming a block
-		        // instance.
-		        tag === 'content' || tag === 'partial' ||
+		        // when root node is <component>, is an element
+		        // directive, or has v-repeat, the instance could
+		        // end up having multiple top-level nodes, thus
+		        // becoming a block instance.
+		        tag === 'component' ||
+		        _.resolveAsset(options, 'elementDirectives', tag) ||
 		        replacer.hasAttribute(config.prefix + 'repeat')
 		      ) {
 		        return frag
@@ -5146,29 +5177,30 @@
 	/***/ function(module, exports, __webpack_require__) {
 
 		// manipulation directives
-		exports.text       = __webpack_require__(29)
-		exports.html       = __webpack_require__(30)
-		exports.attr       = __webpack_require__(31)
-		exports.show       = __webpack_require__(32)
-		exports['class']   = __webpack_require__(34)
-		exports.el         = __webpack_require__(35)
-		exports.ref        = __webpack_require__(36)
-		exports.cloak      = __webpack_require__(37)
-		exports.style      = __webpack_require__(28)
+		exports.text = __webpack_require__(29)
+		exports.html = __webpack_require__(30)
+		exports.attr = __webpack_require__(31)
+		exports.show = __webpack_require__(32)
+		exports['class'] = __webpack_require__(34)
+		exports.el = __webpack_require__(35)
+		exports.ref = __webpack_require__(36)
+		exports.cloak = __webpack_require__(37)
+		exports.style = __webpack_require__(28)
 		exports.transition = __webpack_require__(38)
 
 		// event listener directives
-		exports.on         = __webpack_require__(41)
-		exports.model      = __webpack_require__(42)
+		exports.on = __webpack_require__(41)
+		exports.model = __webpack_require__(42)
 
 		// logic control directives
-		exports.repeat     = __webpack_require__(47)
-		exports['if']      = __webpack_require__(48)
+		exports.repeat = __webpack_require__(47)
+		exports['if'] = __webpack_require__(48)
 
 		// internal directives that should not be used directly
 		// but we still want to expose them for advanced usage.
 		exports._component = __webpack_require__(25)
-		exports._prop      = __webpack_require__(16)
+		exports._prop = __webpack_require__(16)
+
 
 	/***/ },
 	/* 28 */
@@ -5285,6 +5317,7 @@
 		  }
 		}
 
+
 	/***/ },
 	/* 29 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -5302,8 +5335,8 @@
 		  update: function (value) {
 		    this.el[this.attr] = _.toString(value)
 		  }
-		  
 		}
+
 
 	/***/ },
 	/* 30 */
@@ -5348,8 +5381,8 @@
 		    this.nodes = _.toArray(frag.childNodes)
 		    _.before(frag, this.anchor)
 		  }
-
 		}
+
 
 	/***/ },
 	/* 31 */
@@ -5418,6 +5451,7 @@
 		    el.style.display = value ? '' : 'none'
 		  }, this.vm)
 		}
+
 
 	/***/ },
 	/* 33 */
@@ -5552,6 +5586,7 @@
 		  transition[action](op, cb)
 		}
 
+
 	/***/ },
 	/* 34 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -5561,7 +5596,7 @@
 		var removeClass = _.removeClass
 
 		module.exports = {
-		  
+
 		  update: function (value) {
 		    if (this.arg) {
 		      // single toggle
@@ -5602,6 +5637,7 @@
 		  }
 		}
 
+
 	/***/ },
 	/* 35 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -5617,8 +5653,8 @@
 		  unbind: function () {
 		    delete this.vm.$$[this.expression]
 		  }
-		  
 		}
+
 
 	/***/ },
 	/* 36 */
@@ -5645,8 +5681,8 @@
 		    // if any.
 		    vm._refID = this.expression
 		  }
-		  
 		}
+
 
 	/***/ },
 	/* 37 */
@@ -5655,15 +5691,14 @@
 		var config = __webpack_require__(3)
 
 		module.exports = {
-
 		  bind: function () {
 		    var el = this.el
 		    this.vm.$once('hook:compiled', function () {
 		      el.removeAttribute(config.prefix + 'cloak')
 		    })
 		  }
-
 		}
+
 
 	/***/ },
 	/* 38 */
@@ -5694,8 +5729,8 @@
 		    }
 		    _.addClass(el, id + '-transition')
 		  }
-
 		}
+
 
 	/***/ },
 	/* 39 */
@@ -5826,7 +5861,7 @@
 		 *    - transition or animation:
 		 *        wait for end event, remove class, then done if
 		 *        there's no explicit js callback.
-		 *    - no css transition: 
+		 *    - no css transition:
 		 *        done if there's no explicit js callback.
 		 * 7. wait for either done or js callback, then call
 		 *    afterLeave hook.
@@ -6010,6 +6045,7 @@
 
 		module.exports = Transition
 
+
 	/***/ },
 	/* 40 */
 	/***/ function(module, exports, __webpack_require__) {
@@ -6049,6 +6085,7 @@
 		  // unused variable f
 		  return f
 		}
+
 
 	/***/ },
 	/* 41 */
@@ -6113,6 +6150,7 @@
 		    _.off(this.el, 'load', this.iframeBind)
 		  }
 		}
+
 
 	/***/ },
 	/* 42 */
@@ -6191,8 +6229,8 @@
 		      }
 		    }
 		  }
-
 		}
+
 
 	/***/ },
 	/* 43 */
@@ -6233,8 +6271,8 @@
 		        // at the end... have to call it here.
 		        self.listener()
 		      }
-		      _.on(el,'compositionstart', this.onComposeStart)
-		      _.on(el,'compositionend', this.onComposeEnd)
+		      _.on(el, 'compositionstart', this.onComposeStart)
+		      _.on(el, 'compositionend', this.onComposeEnd)
 		    }
 
 		    function syncToModel () {
@@ -6297,7 +6335,7 @@
 		    // Support jQuery events, since jQuery.trigger() doesn't
 		    // trigger native events in some cases and some plugins
 		    // rely on $.trigger()
-		    // 
+		    //
 		    // We want to make sure if a listener is attached using
 		    // jQuery, it is also removed with jQuery, that's why
 		    // we do the check for each directive instance and
@@ -6352,11 +6390,12 @@
 		      _.off(el, 'compositionend', this.onComposeEnd)
 		    }
 		    if (this.onCut) {
-		      _.off(el,'cut', this.onCut)
-		      _.off(el,'keyup', this.onDel)
+		      _.off(el, 'cut', this.onCut)
+		      _.off(el, 'keyup', this.onDel)
 		    }
 		  }
 		}
+
 
 	/***/ },
 	/* 44 */
@@ -6379,15 +6418,16 @@
 		  },
 
 		  update: function (value) {
-		    /* jshint eqeqeq: false */
+		    /* eslint-disable eqeqeq */
 		    this.el.checked = value == this.el.value
+		    /* eslint-enable eqeqeq */
 		  },
 
 		  unbind: function () {
 		    _.off(this.el, 'change', this.listener)
 		  }
-
 		}
+
 
 	/***/ },
 	/* 45 */
@@ -6425,7 +6465,6 @@
 		  },
 
 		  update: function (value) {
-		    /* jshint eqeqeq: false */
 		    var el = this.el
 		    el.selectedIndex = -1
 		    var multi = this.multiple && _.isArray(value)
@@ -6434,9 +6473,11 @@
 		    var option
 		    while (i--) {
 		      option = options[i]
+		      /* eslint-disable eqeqeq */
 		      option.selected = multi
 		        ? indexOf(value, option.value) > -1
 		        : value == option.value
+		      /* eslint-enable eqeqeq */
 		    }
 		  },
 
@@ -6500,7 +6541,6 @@
 		      if (typeof op === 'string') {
 		        el.text = el.value = op
 		      } else {
-		        /* jshint eqeqeq: false */
 		        if (op.value != null) {
 		          el.value = op.value
 		        }
@@ -6572,13 +6612,15 @@
 		 */
 
 		function indexOf (arr, val) {
-		  /* jshint eqeqeq: false */
 		  var i = arr.length
 		  while (i--) {
+		    /* eslint-disable eqeqeq */
 		    if (arr[i] == val) return i
+		    /* eslint-enable eqeqeq */
 		  }
 		  return -1
 		}
+
 
 	/***/ },
 	/* 46 */
@@ -6607,8 +6649,8 @@
 		  unbind: function () {
 		    _.off(this.el, 'change', this.listener)
 		  }
-
 		}
+
 
 	/***/ },
 	/* 47 */
@@ -6962,7 +7004,8 @@
 		    }
 		    // resolve constructor
 		    var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
-		    var vm = this.vm.$addChild({
+		    var parent = this._host || this.vm
+		    var vm = parent.$addChild({
 		      el: templateParser.clone(this.template),
 		      data: data,
 		      inherit: this.inherit,
@@ -6975,12 +7018,12 @@
 		      _asComponent: this.asComponent,
 		      // linker cachable if no inline-template
 		      _linkerCachable: !this.inlineTemplate && Ctor !== _.Vue,
-		      // transclusion host
-		      _host: this._host,
 		      // pre-compiled linker for simple repeats
 		      _linkFn: this._linkFn,
 		      // identifier, shows that this vm belongs to this collection
-		      _repeatId: this.id
+		      _repeatId: this.id,
+		      // transclusion content owner
+		      _context: this.vm
 		    }, Ctor)
 		    // cache instance
 		    if (needCache) {
@@ -7424,12 +7467,6 @@
 		    var vm = this.vm
 		    var start = this.start.nextSibling
 		    var end = this.end
-		    var selfCompoents =
-		      vm._children.length &&
-		      vm._children.filter(contains)
-		    var transComponents =
-		      vm._transCpnts &&
-		      vm._transCpnts.filter(contains)
 
 		    function contains (c) {
 		      var cur = start
@@ -7447,11 +7484,8 @@
 		      return false
 		    }
 
-		    return selfCompoents
-		      ? transComponents
-		        ? selfCompoents.concat(transComponents)
-		        : selfCompoents
-		      : transComponents
+		    return vm.$children.length &&
+		      vm.$children.filter(contains)
 		  },
 
 		  unbind: function () {
@@ -7496,19 +7530,19 @@
 
 		  bind: function () {
 		    var vm = this.vm
-		    var contentOwner = vm
-		    // we need find the content owner, which is the closest
-		    // non-inline-repeater instance.
-		    while (contentOwner.$options._repeat) {
-		      contentOwner = contentOwner.$parent
+		    var host = vm
+		    // we need find the content context, which is the
+		    // closest non-inline-repeater instance.
+		    while (host.$options._repeat) {
+		      host = host.$parent
 		    }
-		    var raw = contentOwner.$options._content
+		    var raw = host.$options._content
 		    var content
 		    if (!raw) {
 		      this.fallback()
 		      return
 		    }
-		    var parent = contentOwner.$parent
+		    var context = host._context
 		    var selector = this.el.getAttribute('select')
 		    if (!selector) {
 		      // Default content
@@ -7516,16 +7550,16 @@
 		      var compileDefaultContent = function () {
 		        self.compile(
 		          extractFragment(raw.childNodes, raw, true),
-		          contentOwner.$parent,
+		          context,
 		          vm
 		        )
 		      }
-		      if (!contentOwner._isCompiled) {
+		      if (!host._isCompiled) {
 		        // defer until the end of instance compilation,
 		        // because the default outlet must wait until all
 		        // other possible outlets with selectors have picked
 		        // out their contents.
-		        contentOwner.$once('hook:compiled', compileDefaultContent)
+		        host.$once('hook:compiled', compileDefaultContent)
 		      } else {
 		        compileDefaultContent()
 		      }
@@ -7536,7 +7570,7 @@
 		      if (nodes.length) {
 		        content = extractFragment(nodes, raw)
 		        if (content.hasChildNodes()) {
-		          this.compile(content, parent, vm)
+		          this.compile(content, context, vm)
 		        } else {
 		          this.fallback()
 		        }
@@ -7550,9 +7584,9 @@
 		    this.compile(_.extractContent(this.el, true), this.vm)
 		  },
 
-		  compile: function (content, owner, host) {
-		    if (content && owner) {
-		      this.unlink = owner.$compile(content, host)
+		  compile: function (content, context, host) {
+		    if (content && context) {
+		      this.unlink = context.$compile(content, host)
 		    }
 		    if (content) {
 		      _.replace(this.el, content)
@@ -7564,7 +7598,7 @@
 		  unbind: function () {
 		    if (this.unlink) {
 		      this.unlink()
-		    } 
+		    }
 		  }
 		}
 
@@ -7648,7 +7682,7 @@
 		  },
 
 		  insert: function (id) {
-		    var partial = this.vm.$options.partials[id]
+		    var partial = _.resolveAsset(this.vm.$options, 'partials', id)
 		    _.assertAsset(partial, 'partial', id)
 		    if (partial) {
 		      var frag = templateParser.parse(partial, true)
@@ -7785,14 +7819,14 @@
 		 */
 
 		var keyCodes = {
-		  enter    : 13,
-		  tab      : 9,
-		  'delete' : 46,
-		  up       : 38,
-		  left     : 37,
-		  right    : 39,
-		  down     : 40,
-		  esc      : 27
+		  esc: 27,
+		  tab: 9,
+		  enter: 13,
+		  'delete': 46,
+		  up: 38,
+		  left: 37,
+		  right: 39,
+		  down: 40
 		}
 
 		exports.key = function (handler, key) {
@@ -7839,7 +7873,6 @@
 		  if (delimiter && delimiter !== 'in') {
 		    dataKey = delimiter
 		  }
-		  /* jshint eqeqeq: false */
 		  if (search == null) {
 		    return arr
 		  }
@@ -7931,51 +7964,47 @@
 
 		  options = options || {}
 
-		  this.$el           = null
-		  this.$parent       = options._parent
-		  this.$root         = options._root || this
-		  this.$             = {} // child vm references
-		  this.$$            = {} // element references
-		  this._watchers     = [] // all watchers as an array
-		  this._directives   = [] // all directives
+		  this.$el = null
+		  this.$parent = options._parent
+		  this.$root = options._root || this
+		  this.$children = []
+		  this.$ = {}           // child vm references
+		  this.$$ = {}          // element references
+		  this._watchers = []   // all watchers as an array
+		  this._directives = [] // all directives
+		  this._childCtors = {} // inherit:true constructors
 
 		  // a flag to avoid this being observed
 		  this._isVue = true
 
 		  // events bookkeeping
-		  this._events         = {}    // registered callbacks
-		  this._eventsCount    = {}    // for $broadcast optimization
+		  this._events = {}            // registered callbacks
+		  this._eventsCount = {}       // for $broadcast optimization
 		  this._eventCancelled = false // for event cancellation
 
 		  // block instance properties
-		  this._isBlock     = false
-		  this._blockStart  =          // @type {CommentNode}
-		  this._blockEnd    = null     // @type {CommentNode}
+		  this._isBlock = false
+		  this._blockStart =    // @type {CommentNode}
+		  this._blockEnd = null // @type {CommentNode}
 
 		  // lifecycle state
-		  this._isCompiled  =
+		  this._isCompiled =
 		  this._isDestroyed =
-		  this._isReady     =
-		  this._isAttached  =
+		  this._isReady =
+		  this._isAttached =
 		  this._isBeingDestroyed = false
-		  this._unlinkFn    = null
+		  this._unlinkFn = null
 
-		  // children
-		  this._children = []
-		  this._childCtors = {}
-
-		  // transcluded components that belong to the parent.
-		  // need to keep track of them so that we can call
-		  // attached/detached hooks on them.
-		  this._transCpnts = []
-		  this._host = options._host
+		  // context: the scope in which the component was used,
+		  // and the scope in which props and contents of this
+		  // instance should be compiled in.
+		  this._context =
+		    options._context ||
+		    options._parent
 
 		  // push self into parent / transclusion host
 		  if (this.$parent) {
-		    this.$parent._children.push(this)
-		  }
-		  if (this._host) {
-		    this._host._transCpnts.push(this)
+		    this.$parent.$children.push(this)
 		  }
 
 		  // props used in v-repeat diffing
@@ -8057,18 +8086,19 @@
 		 * @param {Vue} vm
 		 * @param {String} action
 		 * @param {String} key
-		 * @param {*} handler
+		 * @param {Function|String|Object} handler
+		 * @param {Object} [options]
 		 */
 
-		function register (vm, action, key, handler) {
+		function register (vm, action, key, handler, options) {
 		  var type = typeof handler
 		  if (type === 'function') {
-		    vm[action](key, handler)
+		    vm[action](key, handler, options)
 		  } else if (type === 'string') {
 		    var methods = vm.$options.methods
 		    var method = methods && methods[handler]
 		    if (method) {
-		      vm[action](key, method)
+		      vm[action](key, method, options)
 		    } else {
 		      _.warn(
 		        'Unknown method: "' + handler + '" when ' +
@@ -8076,6 +8106,8 @@
 		        ': "' + key + '".'
 		      )
 		    }
+		  } else if (handler && type === 'object') {
+		    register(vm, action, key, handler.handler, handler)
 		  }
 		}
 
@@ -8094,15 +8126,12 @@
 
 		function onAttached () {
 		  this._isAttached = true
-		  this._children.forEach(callAttach)
-		  if (this._transCpnts.length) {
-		    this._transCpnts.forEach(callAttach)
-		  }
+		  this.$children.forEach(callAttach)
 		}
 
 		/**
 		 * Iterator to call attached hook
-		 * 
+		 *
 		 * @param {Vue} child
 		 */
 
@@ -8118,15 +8147,12 @@
 
 		function onDetached () {
 		  this._isAttached = false
-		  this._children.forEach(callDetach)
-		  if (this._transCpnts.length) {
-		    this._transCpnts.forEach(callDetach)
-		  }
+		  this.$children.forEach(callDetach)
 		}
 
 		/**
 		 * Iterator to call detached hook
-		 * 
+		 *
 		 * @param {Vue} child
 		 */
 
@@ -8151,6 +8177,7 @@
 		  }
 		  this.$emit('hook:' + hook)
 		}
+
 
 	/***/ },
 	/* 56 */
@@ -8201,7 +8228,7 @@
 		}
 
 		/**
-		 * Initialize the data. 
+		 * Initialize the data.
 		 */
 
 		exports._initData = function () {
@@ -8215,7 +8242,7 @@
 		        !optionsData.hasOwnProperty(prop) ||
 		        propsData[prop] !== undefined
 		      ) {
-		        optionsData[prop] = propsData[prop]
+		        optionsData.$set(prop, propsData[prop])
 		      }
 		    }
 		  }
@@ -8252,7 +8279,7 @@
 		  if (props) {
 		    i = props.length
 		    while (i--) {
-		      key = props[i]
+		      key = props[i].name
 		      if (key !== '$data' && !newData.hasOwnProperty(key)) {
 		        newData.$set(key, oldData[key])
 		      }
@@ -8326,7 +8353,7 @@
 		  while (i--) {
 		    this._watchers[i].update()
 		  }
-		  var children = this._children
+		  var children = this.$children
 		  i = children.length
 		  while (i--) {
 		    var child = children[i]
@@ -8555,17 +8582,12 @@
 		  // if parent is not being destroyed as well.
 		  var parent = this.$parent
 		  if (parent && !parent._isBeingDestroyed) {
-		    parent._children.$remove(this)
-		  }
-		  // same for transclusion host.
-		  var host = this._host
-		  if (host && !host._isBeingDestroyed) {
-		    host._transCpnts.$remove(this)
+		    parent.$children.$remove(this)
 		  }
 		  // destroy all children.
-		  i = this._children.length
+		  i = this.$children.length
 		  while (i--) {
-		    this._children[i].$destroy()
+		    this.$children[i].$destroy()
 		  }
 		  // teardown props
 		  if (this._propsUnlinkFn) {
@@ -8609,8 +8631,7 @@
 		  this.$el =
 		  this.$parent =
 		  this.$root =
-		  this._children =
-		  this._transCpnts =
+		  this.$children =
 		  this._directives = null
 		  // call the last hook...
 		  this._isDestroyed = true
@@ -8844,6 +8865,7 @@
 		}
 
 		module.exports = Directive
+
 
 	/***/ },
 	/* 59 */
@@ -9456,7 +9478,7 @@
 		  // if no child has registered for this event,
 		  // then there's no need to broadcast.
 		  if (!this._eventsCount[event]) return
-		  var children = this._children
+		  var children = this.$children
 		  for (var i = 0, l = children.length; i < l; i++) {
 		    var child = children[i]
 		    child.$emit.apply(child, arguments)
@@ -9507,6 +9529,7 @@
 		    parent = parent.$parent
 		  }
 		}
+
 
 	/***/ },
 	/* 63 */
@@ -9559,6 +9582,7 @@
 		  var child = new ChildVue(opts)
 		  return child
 		}
+
 
 	/***/ },
 	/* 64 */
@@ -21898,6 +21922,833 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function install(Vue) {
+
+
+	    Vue.$bixConfig = window.$bixConfig || {csrf: '', url: ''};
+	    /**
+	     * Libraries/plugins
+	     */
+
+	    Vue.use(__webpack_require__(6));//must point to /src/index.js to work!
+	    Vue.use(__webpack_require__(12));
+	    __webpack_require__(13);
+	    //require('./lib/globalize');
+	    __webpack_require__(5)(Vue);
+	    __webpack_require__(14)(Vue);
+
+
+	    /**
+	     * Components
+	     */
+
+	    //Vue.component('v-pagination', require('./components/pagination'));
+	    //Vue.component('v-loader', require('./components/loader.vue'));
+
+	    /**
+	     * Directives
+	     */
+
+
+	    Vue.directive('checkbox', __webpack_require__(15));
+
+	    /**
+	     * Resource
+	     */
+
+	    Vue.url.options.root = Vue.$bixConfig.url;
+	    Vue.http.options.emulateHTTP = true;
+	    Vue.http.options.headers = {'X-XSRF-TOKEN': Vue.$bixConfig.csrf};
+
+	};
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	module.exports = function (Vue) {
+
+	    //var formats = ['full', 'long', 'medium', 'short'];
+	    //
+	    //Vue.prototype.$date = function (date, format) {
+	    //
+	    //    var options = format;
+	    //
+	    //    if (typeof date == 'string') {
+	    //        date = new Date(date);
+	    //    }
+	    //
+	    //    if (typeof options == 'string') {
+	    //        if (formats.indexOf(format) != -1) {
+	    //            options = {date: format};
+	    //        } else {
+	    //            options = {skeleton: format};
+	    //        }
+	    //    }
+	    //
+	    //    return Globalize.formatDate(date, options);
+	    //};
+	    //
+	    //Vue.prototype.$relativeDate = function (value, reference) {
+	    //    var SECOND = 1000,
+	    //        MINUTE = 60 * SECOND,
+	    //        HOUR = 60 * MINUTE,
+	    //        DAY = 24 * HOUR,
+	    //        WEEK = 7 * DAY,
+	    //        YEAR = DAY * 365,
+	    //        MONTH = YEAR / 12;
+	    //
+	    //    var formats = [
+	    //
+	    //        [1.5 * MINUTE, 'minute', MINUTE],
+	    //        [60 * MINUTE, 'minute', MINUTE],
+	    //        [DAY, 'hour', HOUR],
+	    //        [7 * DAY, 'day', DAY],
+	    //        [MONTH, 'week', WEEK]
+	    //
+	    //    ], formatter;
+	    //
+	    //    if (typeof(value)) value = new Date(value);
+	    //    if (!reference) reference = (new Date).getTime();
+	    //    if (reference instanceof Date) reference = reference.getTime();
+	    //    if (value instanceof Date) value = value.getTime();
+	    //
+	    //    var delta = reference - value, format, i, len;
+	    //
+	    //    for (i = -1, len = formats.length; ++i < len;) {
+	    //
+	    //        format = formats[i];
+	    //
+	    //        if (delta < format[0]) {
+	    //
+	    //            formatter = Globalize.relativeTimeFormatter(format[1]);
+	    //
+	    //            return formatter(Math.round(delta / format[2]) * -1);
+	    //        }
+	    //    }
+	    //
+	    //    return this.$date((new Date(value)).toISOString(), 'medium');
+	    //};
+
+	    //Vue.prototype.$trans = Globalize.trans;
+	    //Vue.prototype.$transChoice = Globalize.transChoice;
+
+	    Vue.prototype.$trans = function (id, parameters, domain, locale) {
+	        //todo implement globalize
+	        return id;
+	    };
+
+	};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Install plugin.
+	 */
+
+	function install (Vue) {
+	    Vue.url = __webpack_require__(7)(Vue);
+	    Vue.http = __webpack_require__(9)(Vue);
+	    Vue.resource = __webpack_require__(11)(Vue);
+	}
+
+	if (window.Vue) {
+	    Vue.use(install);
+	}
+
+	module.exports = install;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function (Vue) {
+
+	    var _ = __webpack_require__(8)(Vue);
+
+	    /**
+	     * Url provides URL templating.
+	     *
+	     * @param {String} url
+	     * @param {Object} params
+	     */
+
+	    function Url (url, params) {
+
+	        var urlParams = {}, queryParams = {}, options = url, query;
+
+	        if (!_.isPlainObject(options)) {
+	            options = {url: url, params: params};
+	        }
+
+	        options = _.extend({}, Url.options, _.options('url', this, options));
+
+	        url = options.url.replace(/:([a-z]\w*)/gi, function (match, name) {
+
+	            if (options.params[name]) {
+	                urlParams[name] = true;
+	                return encodeUriSegment(options.params[name]);
+	            }
+
+	            return '';
+	        });
+
+	        if (options.root !== false && !url.match(/^(https?:)?\//)) {
+	            url = options.root + '/' + url;
+	        }
+
+	        url = url.replace(/([^:])[\/]{2,}/g, '$1/');
+	        url = url.replace(/(\w+)\/+$/, '$1');
+
+	        _.each(options.params, function (value, key) {
+	            if (!urlParams[key]) {
+	                queryParams[key] = value;
+	            }
+	        });
+
+	        query = Url.params(queryParams);
+
+	        if (query) {
+	            url += (url.indexOf('?') == -1 ? '?' : '&') + query;
+	        }
+
+	        return url;
+	    }
+
+	    /**
+	     * Url options.
+	     */
+
+	    Url.options = {
+	        url: '',
+	        root: false,
+	        params: {}
+	    };
+
+	    /**
+	     * Encodes a Url parameter string.
+	     *
+	     * @param {Object} obj
+	     */
+
+	    Url.params = function (obj) {
+
+	        var params = [];
+
+	        params.add = function (key, value) {
+
+	            if (_.isFunction (value)) {
+	                value = value();
+	            }
+
+	            if (value === null) {
+	                value = '';
+	            }
+
+	            this.push(encodeUriSegment(key) + '=' + encodeUriSegment(value));
+	        };
+
+	        serialize(params, obj);
+
+	        return params.join('&');
+	    };
+
+	    /**
+	     * Parse a URL and return its components.
+	     *
+	     * @param {String} url
+	     */
+
+	    Url.parse = function (url) {
+
+	        var pattern = new RegExp("^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?"),
+	            matches = url.match(pattern);
+
+	        return {
+	            url: url,
+	            scheme: matches[1] || '',
+	            host: matches[2] || '',
+	            path: matches[3] || '',
+	            query: matches[4] || '',
+	            fragment: matches[5] || ''
+	        };
+	    };
+
+	    function serialize (params, obj, scope) {
+
+	        var array = _.isArray(obj), plain = _.isPlainObject(obj), hash;
+
+	        _.each(obj, function (value, key) {
+
+	            hash = _.isObject(value) || _.isArray(value);
+
+	            if (scope) {
+	                key = scope + '[' + (plain || hash ? key : '') + ']';
+	            }
+
+	            if (!scope && array) {
+	                params.add(value.name, value.value);
+	            } else if (hash) {
+	                serialize(params, value, key);
+	            } else {
+	                params.add(key, value);
+	            }
+	        });
+	    }
+
+	    function encodeUriSegment (value) {
+
+	        return encodeUriQuery(value, true).
+	            replace(/%26/gi, '&').
+	            replace(/%3D/gi, '=').
+	            replace(/%2B/gi, '+');
+	    }
+
+	    function encodeUriQuery (value, spaces) {
+
+	        return encodeURIComponent(value).
+	            replace(/%40/gi, '@').
+	            replace(/%3A/gi, ':').
+	            replace(/%24/g, '$').
+	            replace(/%2C/gi, ',').
+	            replace(/%20/g, (spaces ? '%20' : '+'));
+	    }
+
+	    Object.defineProperty(Vue.prototype, '$url', {
+
+	        get: function () {
+	            return _.extend(Url.bind(this), Url);
+	        }
+
+	    });
+
+	    return Url;
+	};
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	/**
+	 * Utility functions.
+	 */
+
+	module.exports = function (Vue) {
+
+	    var _ = Vue.util.extend({}, Vue.util);
+
+	    _.options = function (key, obj, options) {
+
+	        var opts = obj.$options || {};
+
+	        return _.extend({},
+	            opts[key],
+	            options
+	        );
+	    };
+
+	    _.each = function (obj, iterator) {
+
+	        var i, key;
+
+	        if (typeof obj.length == 'number') {
+	            for (i = 0; i < obj.length; i++) {
+	                iterator.call(obj[i], obj[i], i);
+	            }
+	        } else if (_.isObject(obj)) {
+	            for (key in obj) {
+	                if (obj.hasOwnProperty(key)) {
+	                    iterator.call(obj[key], obj[key], key);
+	                }
+	            }
+	        }
+
+	        return obj;
+	    };
+
+	    _.extend = function (target) {
+
+	        var array = [], args = array.slice.call(arguments, 1), deep;
+
+	        if (typeof target == 'boolean') {
+	            deep = target;
+	            target = args.shift();
+	        }
+
+	        args.forEach(function (arg) {
+	            extend(target, arg, deep);
+	        });
+
+	        return target;
+	    };
+
+	    function extend (target, source, deep) {
+	        for (var key in source) {
+	            if (deep && (_.isPlainObject(source[key]) || _.isArray(source[key]))) {
+	                if (_.isPlainObject(source[key]) && !_.isPlainObject(target[key])) {
+	                    target[key] = {};
+	                }
+	                if (_.isArray(source[key]) && !_.isArray(target[key])) {
+	                    target[key] = [];
+	                }
+	                extend(target[key], source[key], deep);
+	            } else if (source[key] !== undefined) {
+	                target[key] = source[key];
+	            }
+	        }
+	    }
+
+	    _.isFunction = function (obj) {
+	        return obj && typeof obj === 'function';
+	    };
+
+	    return _;
+	};
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function (Vue) {
+
+	    var _ = __webpack_require__(8)(Vue);
+	    var Promise = __webpack_require__(10);
+	    var jsonType = { 'Content-Type': 'application/json;charset=utf-8' };
+
+	    /**
+	     * Http provides a service for sending XMLHttpRequests.
+	     */
+
+	    function Http (url, options) {
+
+	        var self = this, headers, promise;
+
+	        options = options || {};
+
+	        if (_.isPlainObject(url)) {
+	            options = url;
+	            url = '';
+	        }
+
+	        headers = _.extend({},
+	            Http.headers.common,
+	            Http.headers[options.method.toLowerCase()]
+	        );
+
+	        options = _.extend(true, {url: url, headers: headers},
+	            Http.options, _.options('http', this, options)
+	        );
+
+	        promise = (options.method.toLowerCase() == 'jsonp' ? jsonp : xhr).call(this, this.$url || Vue.url, options);
+
+	        _.extend(promise, {
+
+	            success: function (onSuccess) {
+
+	                this.then(function (request) {
+	                    onSuccess.apply(self, parseReq(request));
+	                }, function () {});
+
+	                return this;
+	            },
+
+	            error: function (onError) {
+
+	                this.catch(function (request) {
+	                    onError.apply(self, parseReq(request));
+	                });
+
+	                return this;
+	            },
+
+	            always: function (onAlways) {
+
+	                var cb = function (request) {
+	                    onAlways.apply(self, parseReq(request));
+	                };
+
+	                this.then(cb, cb);
+
+	                return this;
+	            }
+
+	        });
+
+	        if (options.success) {
+	            promise.success(options.success);
+	        }
+
+	        if (options.error) {
+	            promise.error(options.error);
+	        }
+
+	        return promise;
+	    }
+
+	    function xhr(url, options) {
+
+	        var request = new XMLHttpRequest();
+
+	        if (_.isFunction(options.beforeSend)) {
+	            options.beforeSend(request, options);
+	        }
+
+	        if (options.emulateHTTP && /^(PUT|PATCH|DELETE)$/i.test(options.method)) {
+	            options.headers['X-HTTP-Method-Override'] = options.method;
+	            options.method = 'POST';
+	        }
+
+	        if (options.emulateJSON && _.isPlainObject(options.data)) {
+	            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+	            options.data = url.params(options.data);
+	        }
+
+	        if (_.isObject(options.data) && /FormData/i.test(options.data.toString())) {
+	            delete options.headers['Content-Type'];
+	        }
+
+	        if (_.isPlainObject(options.data)) {
+	            options.data = JSON.stringify(options.data);
+	        }
+
+	        var promise = new Promise(function (resolve, reject) {
+
+	            request.open(options.method, url(options), true);
+
+	            _.each(options.headers, function (value, header) {
+	                request.setRequestHeader(header, value);
+	            });
+
+	            request.onreadystatechange = function () {
+
+	                if (this.readyState === 4) {
+
+	                    if (this.status >= 200 && this.status < 300) {
+	                        resolve(this);
+	                    } else {
+	                        reject(this);
+	                    }
+	                }
+	            };
+
+	            request.send(options.data);
+	        });
+
+	        _.extend(promise, {
+
+	            abort: function () {
+	                request.abort();
+	            }
+
+	        });
+
+	        return promise;
+	    }
+
+	    function jsonp(url, options) {
+
+	        var callback = '_jsonp' + Math.random().toString(36).substr(2), script, result;
+
+	        _.extend(options.params, options.data);
+	        options.params[options.jsonp] = callback;
+
+	        if (_.isFunction(options.beforeSend)) {
+	            options.beforeSend({}, options);
+	        }
+
+	        var promise = new Promise(function (resolve, reject) {
+
+	            script = document.createElement('script');
+	            script.src = url(options.url, options.params);
+	            script.type = 'text/javascript';
+	            script.async = true;
+
+	            window[callback] = function (data) {
+	                result = data;
+	            };
+
+	            var handler = function (event) {
+
+	                delete window[callback];
+	                document.body.removeChild(script);
+
+	                if (event.type === 'load' && !result) {
+	                    event.type = 'error';
+	                }
+
+	                var text = result ? result : event.type, status = event.type === 'error' ? 404 : 200;
+
+	                (status === 200 ? resolve : reject)({ responseText: text, status: status });
+	            };
+
+	            script.onload = handler;
+	            script.onerror = handler;
+
+	            document.body.appendChild(script);
+	        });
+
+	        return promise;
+	    }
+
+	    function parseReq(request) {
+
+	        var result;
+
+	        try {
+	            result = JSON.parse(request.responseText);
+	        } catch (e) {
+	            result = request.responseText;
+	        }
+
+	        return [result, request.status, request];
+	    }
+
+	    Http.options = {
+	        method: 'GET',
+	        params: {},
+	        data: '',
+	        jsonp: 'callback',
+	        beforeSend: null,
+	        emulateHTTP: false,
+	        emulateJSON: false,
+	    };
+
+	    Http.headers = {
+	        put: jsonType,
+	        post: jsonType,
+	        patch: jsonType,
+	        delete: jsonType,
+	        common: {
+	            'Accept': 'application/json, text/plain, */*',
+	            'X-Requested-With': 'XMLHttpRequest'
+	        }
+	    };
+
+	    ['get', 'put', 'post', 'patch', 'delete', 'jsonp'].forEach(function (method) {
+
+	        Http[method] = function (url, data, success, options) {
+
+	            if (_.isFunction(data)) {
+	                options = success;
+	                success = data;
+	                data = undefined;
+	            }
+
+	            return this(url, _.extend({method: method, data: data, success: success}, options));
+	        };
+	    });
+
+	    Object.defineProperty(Vue.prototype, '$http', {
+
+	        get: function () {
+	            return _.extend(Http.bind(this), Http);
+	        }
+
+	    });
+
+	    return Http;
+	};
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	/**
+	 * Promise polyfill (https://gist.github.com/briancavalier/814313)
+	 */
+
+	function Promise (executor) {
+	    executor(this.resolve.bind(this), this.reject.bind(this));
+	    this._thens = [];
+	}
+
+	Promise.prototype = {
+
+	    then: function (onResolve, onReject, onProgress) {
+	        this._thens.push({resolve: onResolve, reject: onReject, progress: onProgress});
+	    },
+
+	    'catch': function (onReject) {
+	        this._thens.push({reject: onReject});
+	    },
+
+	    resolve: function (value) {
+	        this._complete('resolve', value);
+	    },
+
+	    reject: function (reason) {
+	        this._complete('reject', reason);
+	    },
+
+	    progress: function (status) {
+
+	        var i = 0, aThen;
+
+	        while (aThen = this._thens[i++]) {
+	            aThen.progress && aThen.progress(status);
+	        }
+	    },
+
+	    _complete: function (which, arg) {
+
+	        this.then = which === 'resolve' ?
+	            function (resolve, reject) { resolve && resolve(arg); } :
+	            function (resolve, reject) { reject && reject(arg); };
+
+	        this.resolve = this.reject = this.progress =
+	            function () { throw new Error('Promise already completed.'); };
+
+	        var aThen, i = 0;
+
+	        while (aThen = this._thens[i++]) {
+	            aThen[which] && aThen[which](arg);
+	        }
+
+	        delete this._thens;
+	    }
+	};
+
+	module.exports = window.Promise ? window.Promise : Promise;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function (Vue) {
+
+	    var _ = __webpack_require__(8)(Vue);
+
+	    /**
+	     * Resource provides interaction support with RESTful services.
+	     */
+
+	    function Resource (url, params, actions) {
+
+	        var self = this, resource = {};
+
+	        actions = _.extend({},
+	            Resource.actions,
+	            actions
+	        );
+
+	        _.each(actions, function (action, name) {
+
+	            action = _.extend(true, {url: url, params: params || {}}, action);
+
+	            resource[name] = function () {
+	                return (self.$http || Vue.http)(opts(action, arguments));
+	            };
+	        });
+
+	        return resource;
+	    }
+
+	    function opts (action, args) {
+
+	        var options = _.extend({}, action), params = {}, data, success, error;
+
+	        switch (args.length) {
+
+	            case 4:
+
+	                error = args[3];
+	                success = args[2];
+
+	            case 3:
+	            case 2:
+
+	                if (_.isFunction (args[1])) {
+
+	                    if (_.isFunction (args[0])) {
+
+	                        success = args[0];
+	                        error = args[1];
+
+	                        break;
+	                    }
+
+	                    success = args[1];
+	                    error = args[2];
+
+	                } else {
+
+	                    params = args[0];
+	                    data = args[1];
+	                    success = args[2];
+
+	                    break;
+	                }
+
+	            case 1:
+
+	                if (_.isFunction (args[0])) {
+	                    success = args[0];
+	                } else if (/^(POST|PUT|PATCH)$/i.test(options.method)) {
+	                    data = args[0];
+	                } else {
+	                    params = args[0];
+	                }
+
+	                break;
+
+	            case 0:
+
+	                break;
+
+	            default:
+
+	                throw 'Expected up to 4 arguments [params, data, success, error], got ' + args.length + ' arguments';
+	        }
+
+	        options.url = action.url;
+	        options.data = data;
+	        options.params = _.extend({}, action.params, params);
+
+	        if (success) {
+	            options.success = success;
+	        }
+
+	        if (error) {
+	            options.error = error;
+	        }
+
+	        return options;
+	    }
+
+	    Resource.actions = {
+
+	        get: {method: 'GET'},
+	        save: {method: 'POST'},
+	        query: {method: 'GET'},
+	        remove: {method: 'DELETE'},
+	        delete: {method: 'DELETE'}
+
+	    };
+
+	    Object.defineProperty(Vue.prototype, '$resource', {
+
+	        get: function () {
+	            return Resource.bind(this);
+	        }
+
+	    });
+
+	    return Resource;
+	};
+
+
+/***/ },
+/* 12 */
 /***/ function(module, exports) {
 
 	exports.install = function (Vue) {
@@ -21960,16 +22811,665 @@
 
 
 /***/ },
-/* 5 */
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	;(function(){
+
+	/**
+	 * Require the given path.
+	 *
+	 * @param {String} path
+	 * @return {Object} exports
+	 * @api public
+	 */
+
+	function require(path, parent, orig) {
+	  var resolved = require.resolve(path);
+
+	  // lookup failed
+	  if (null == resolved) {
+	    orig = orig || path;
+	    parent = parent || 'root';
+	    var err = new Error('Failed to require "' + orig + '" from "' + parent + '"');
+	    err.path = orig;
+	    err.parent = parent;
+	    err.require = true;
+	    throw err;
+	  }
+
+	  var module = require.modules[resolved];
+
+	  // perform real require()
+	  // by invoking the module's
+	  // registered function
+	  if (!module._resolving && !module.exports) {
+	    var mod = {};
+	    mod.exports = {};
+	    mod.client = mod.component = true;
+	    module._resolving = true;
+	    module.call(this, mod.exports, require.relative(resolved), mod);
+	    delete module._resolving;
+	    module.exports = mod.exports;
+	  }
+
+	  return module.exports;
+	}
+
+	/**
+	 * Registered modules.
+	 */
+
+	require.modules = {};
+
+	/**
+	 * Registered aliases.
+	 */
+
+	require.aliases = {};
+
+	/**
+	 * Resolve `path`.
+	 *
+	 * Lookup:
+	 *
+	 *   - PATH/index.js
+	 *   - PATH.js
+	 *   - PATH
+	 *
+	 * @param {String} path
+	 * @return {String} path or null
+	 * @api private
+	 */
+
+	require.resolve = function(path) {
+	  if (path.charAt(0) === '/') path = path.slice(1);
+
+	  var paths = [
+	    path,
+	    path + '.js',
+	    path + '.json',
+	    path + '/index.js',
+	    path + '/index.json'
+	  ];
+
+	  for (var i = 0; i < paths.length; i++) {
+	    var path = paths[i];
+	    if (require.modules.hasOwnProperty(path)) return path;
+	    if (require.aliases.hasOwnProperty(path)) return require.aliases[path];
+	  }
+	};
+
+	/**
+	 * Normalize `path` relative to the current path.
+	 *
+	 * @param {String} curr
+	 * @param {String} path
+	 * @return {String}
+	 * @api private
+	 */
+
+	require.normalize = function(curr, path) {
+	  var segs = [];
+
+	  if ('.' != path.charAt(0)) return path;
+
+	  curr = curr.split('/');
+	  path = path.split('/');
+
+	  for (var i = 0; i < path.length; ++i) {
+	    if ('..' == path[i]) {
+	      curr.pop();
+	    } else if ('.' != path[i] && '' != path[i]) {
+	      segs.push(path[i]);
+	    }
+	  }
+
+	  return curr.concat(segs).join('/');
+	};
+
+	/**
+	 * Register module at `path` with callback `definition`.
+	 *
+	 * @param {String} path
+	 * @param {Function} definition
+	 * @api private
+	 */
+
+	require.register = function(path, definition) {
+	  require.modules[path] = definition;
+	};
+
+	/**
+	 * Alias a module definition.
+	 *
+	 * @param {String} from
+	 * @param {String} to
+	 * @api private
+	 */
+
+	require.alias = function(from, to) {
+	  if (!require.modules.hasOwnProperty(from)) {
+	    throw new Error('Failed to alias "' + from + '", it does not exist');
+	  }
+	  require.aliases[to] = from;
+	};
+
+	/**
+	 * Return a require function relative to the `parent` path.
+	 *
+	 * @param {String} parent
+	 * @return {Function}
+	 * @api private
+	 */
+
+	require.relative = function(parent) {
+	  var p = require.normalize(parent, '..');
+
+	  /**
+	   * lastIndexOf helper.
+	   */
+
+	  function lastIndexOf(arr, obj) {
+	    var i = arr.length;
+	    while (i--) {
+	      if (arr[i] === obj) return i;
+	    }
+	    return -1;
+	  }
+
+	  /**
+	   * The relative require() itself.
+	   */
+
+	  function localRequire(path) {
+	    var resolved = localRequire.resolve(path);
+	    return require(resolved, parent, path);
+	  }
+
+	  /**
+	   * Resolve relative to the parent.
+	   */
+
+	  localRequire.resolve = function(path) {
+	    var c = path.charAt(0);
+	    if ('/' == c) return path.slice(1);
+	    if ('.' == c) return require.normalize(p, path);
+
+	    // resolve deps by returning
+	    // the dep in the nearest "deps"
+	    // directory
+	    var segs = parent.split('/');
+	    var i = lastIndexOf(segs, 'deps') + 1;
+	    if (!i) i = 0;
+	    path = segs.slice(0, i + 1).join('/') + '/deps/' + path;
+	    return path;
+	  };
+
+	  /**
+	   * Check if module is defined at `path`.
+	   */
+
+	  localRequire.exists = function(path) {
+	    return require.modules.hasOwnProperty(localRequire.resolve(path));
+	  };
+
+	  return localRequire;
+	};
+	require.register("vue-validator/index.js", function(exports, require, module){
+	var slice = [].slice
+	var hasOwn = ({}).hasOwnProperty
+
+
+	/**
+	 * export(s)
+	 */
+
+	module.exports = function (Vue) {
+	  var utils = Vue.require('utils')
+	  var Directive = Vue.require('directive')
+	  var Binding = Vue.require('binding')
+	  var Observer = Vue.require('observer')
+
+	  var validationKey = '$validation'
+	  var validationPropertyName = validationKey.split('$')[1]
+	  var validKey = '$valid'
+
+	  Vue.filter('required', validateRequired)
+	  Vue.filter('pattern', validatePattern)
+	  Vue.filter('length', validateLength)
+	  Vue.filter('numeric', validateNumeric)
+	  Vue.filter('validator', validateCustom)
+
+	  Vue.directive('validate', {
+	    bind: function () {
+	      var compiler = this.compiler
+	      var $validation = compiler[validationPropertyName] || {}
+	      var el = this.el
+	      var vm = this.vm
+	      var observer = compiler.observer
+	      var validationBindings = this.validationBindings = {}
+
+	      // enable $validation
+	      vm[validationKey] = compiler[validationPropertyName] = $validation
+	      Observer.observe($validation, validationKey, compiler.observer)
+	      compiler.bindings[validationKey] = new Binding(compiler, validationKey)
+	      validationBindings[validationKey] = compiler.bindings[validationKey]
+
+	      // register validation state from v-model directive
+	      function registerValidation (element) {
+	        if (element.nodeType === 1 
+	          && element.tagName !== 'SCRIPT' 
+	          && element.hasChildNodes()) {
+	          slice.call(element.childNodes).forEach(function (node) {
+	            if (node.nodeType === 1) {
+	              if (node.hasChildNodes()) {
+	                registerValidation(node)
+	              } else {
+	                var tag = node.tagName
+	                if ((tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') 
+	                  && node.hasAttributes) {
+	                  var attrs = slice.call(node.attributes)
+	                  for (var i = 0; i < attrs.length; i++) {
+	                    var attr = attrs[i]
+	                    if (attr.name === 'v-model') {
+	                      var asts = Directive.parse(attr.value)
+	                      var key = asts[0].key
+	                      var filters = asts[0].filters
+	                      if (filters) {
+	                        initValidationState($validation, key, filters, compiler, validationBindings)
+	                        attr.value = makeFilterExpression($validation, key, filters)
+	                      }
+	                    }
+	                  }
+	                }
+	              }
+	            }
+	          })
+	        }
+	      }
+	      registerValidation(el)
+
+	      // enable $valid
+	      var validBinding = compiler.bindings[validKey] = new Binding(compiler, validKey)
+	      validationBindings[validKey] = validBinding
+	      Object.defineProperty(vm, validKey, {
+	        enumerable: true,
+	        configurable: true,
+	        get: function () {
+	          observer.emit('get', validKey)
+	          return validBinding.value
+	        }
+	      })
+
+	      // inject validation checking handle
+	      function updateValid () {
+	        var valid = true
+	        for (var key in $validation) {
+	          if ($validation[key]) {
+	            valid = false
+	            break
+	          }
+	        }
+	        validBinding.update(valid)
+	      }
+	      this._handleValid = function (key) {
+	        if (validationKey === key || validKey === key) { return }
+	        if (key in validationBindings) {
+	          updateValid()
+	        }
+	      }
+	      observer.on('set', this._handleValid)
+	    },
+
+	    unbind: function () {
+	      var compiler = this.compiler
+	      var vm = this.vm
+	      var observer = compiler.observer
+	      var $validation = compiler[validationPropertyName]
+	      var validationBindings = this.validationBindings
+	      var bindings = compiler.bindings
+
+	      // disable $valid
+	      observer.off(this._handleValid)
+	      delete this._handleValid
+	      delete vm[validKey]
+
+	      // release bindings
+	      for (var key in validationBindings) {
+	        var binding = bindings[key]
+	        if (binding) {
+	          binding.unbind()
+	          delete bindings[key]
+	        }
+	        validationBindings[key] = null
+	      }
+	      delete this.validationBindings
+
+	      // disable $validation
+	      Observer.unobserve($validation, validationKey, compiler.observer)
+	      delete compiler[validationPropertyName]
+	      delete vm[validationKey]
+	    }
+	  })
+
+
+	  function initValidationState ($validation, key, filters, compiler, validationBindings) {
+	    var path, bindingPath, args = []
+	    for (var i = 0; i < filters.length; i++) {
+	      var filterName = filters[i].name
+	      if (filterName === 'required' || filterName === 'pattern') {
+	        path = [key, filterName].join('.')
+	        bindingPath = [validationKey, key, filterName].join('.')
+	        makeBinding(path, bindingPath)
+	      } else if (filterName === 'length' || filterName === 'numeric') {
+	        args = parseFilterArgs(filters[i].args)
+	        if (filterName === 'numeric') { args.push('value') }
+	        for (var j = 0; j < args.length; j++) {
+	          path = [key, filterName, args[j]].join('.')
+	          bindingPath = [validationKey, key, filterName, args[j]].join('.')
+	          makeBinding(path, bindingPath)
+	        }
+	      } else if (filterName === 'validator') {
+	        path = [key, filterName, filters[i].args[0]].join('.')
+	        bindingPath = [validationKey, key, filterName, filters[i].args[0]].join('.')
+	        makeBinding(path, bindingPath)
+	      }
+	    }
+
+	    function makeBinding (path, bindingPath) {
+	      var binding = validationBindings[bindingPath] || new Binding(compiler, bindingPath)
+	      compiler.bindings[bindingPath] = validationBindings[bindingPath] = binding
+	      defineProperty($validation, path, binding)
+	    }
+	  }
+
+	  function parseFilterArgs (args) {
+	    var ret = []
+
+	    for (var i = 0; i < args.length; i++) {
+	      var arg = args[i], parsed = arg.split(':')
+	      if (parsed.length !== 2) { continue }
+	      ret.push(parsed[0])
+	    }
+
+	    return ret
+	  }
+
+	  function makeFilterExpression ($validation, key, filters) {
+	    var elements = [key]
+	    var ret = ''
+
+	    for (var i = 0; i < filters.length; i++) {
+	      var filterName = filters[i].name
+	      if (filters[i].args) {
+	        elements.push([filterName].concat(filters[i].args).concat([key]).join(' '))
+	      } else {
+	        elements.push(filterName + ' ' + key)
+	      }
+	    }
+
+	    ret = elements.join('|')
+	    utils.log('makeFilterExpression: ' + ret)
+
+	    return ret
+	  }
+
+	  function defineProperty ($validation, key, binding) {
+	    var observer = $validation.__emitter__
+
+	      if (!(hasOwn.call($validation, key))) {
+	        $validation[key] = undefined
+	      }
+
+	    if (observer && !(hasOwn.call(observer.values, key))) {
+	      Observer.convertKey($validation, key)
+	    }
+
+	    binding.value = $validation[key]
+	  }
+	}
+
+
+	/**
+	 * validate filters
+	 */
+
+	function validateRequired (val, key) {
+	  try {
+	    this.$validation[[key, 'required'].join('.')] = (val.length === 0)
+	  } catch (e) {
+	    console.error('required filter error:', e)
+	  }
+
+	  return val
+	}
+
+	function validatePattern (val) {
+	  try {
+	    var key = arguments[arguments.length - 1]
+	    var pattern = arguments[1].replace(/^'/, "").replace(/'$/, "")
+
+	    var match = pattern.match(/^\/(.*)\/([gim]*)$/)
+	    if (match) {
+	      var re = new RegExp(match[1], match[2])
+	      this.$validation[[key, 'pattern'].join('.')] = !re.test(val)
+	    }
+	  } catch (e) {
+	    console.error('pattern filter error:', e)
+	  }
+
+	  return val
+	}
+
+	function validateLength (val) {
+	  try {
+	    var key = arguments[arguments.length - 1]
+	      var minKey = [key, 'length', 'min'].join('.')
+	      var maxKey = [key, 'length', 'max'].join('.')
+	      var args = {}
+
+	    // parse length condition arguments
+	    for (var i = 1; i < arguments.length - 1; i++) {
+	      var parsed = arguments[i].split(':')
+	      if (parsed.length !== 2) { continue }
+	      if (isNaN(parsed[1])) { continue }
+	      args[parsed[0]] = parseInt(parsed[1])
+	    }
+
+	    // validate min
+	    if ('min' in args) {
+	      this.$validation[minKey] = (val.length < args['min'])
+	    }
+
+	    // validate max
+	    if ('max' in args) {
+	      this.$validation[maxKey] = (val.length > args['max'])
+	    }
+	  } catch (e) {
+	    console.error('length filter error:', e)
+	  }
+
+	  return val
+	}
+
+	function validateNumeric (val) {
+	  try {
+	    var key = arguments[arguments.length - 1]
+	    var minKey = [key, 'numeric', 'min'].join('.')
+	    var maxKey = [key, 'numeric', 'max'].join('.')
+	    var valueKey = [key, 'numeric', 'value'].join('.')
+	    var args = {}
+
+	    // parse numeric condition arguments
+	    for (var i = 1; i < arguments.length - 1; i++) {
+	      var parsed = arguments[i].split(':')
+	      if (parsed.length !== 2) { continue }
+	      if (isNaN(parsed[1])) { continue }
+	      args[parsed[0]] = parseInt(parsed[1])
+	    }
+
+	    if (isNaN(val)) {
+	      this.$validation[valueKey] = true
+	      if ('min' in args) {
+	        this.$validation[minKey] = false
+	      }
+	      if ('max' in args) {
+	        this.$validation[maxKey] = false
+	      }
+	    } else {
+	      this.$validation[valueKey] = false
+
+	      var value = parseInt(val)
+
+	      // validate min
+	      if ('min' in args) {
+	        this.$validation[minKey] = (value < args['min'])
+	      }
+
+	      // validate max
+	      if ('max' in args) {
+	        this.$validation[maxKey] = (value > args['max'])
+	      }
+	    }
+	  } catch (e) {
+	    console.error('numeric filter error:', e)
+	  }
+
+	  return val
+	}
+
+	function validateCustom (val, custom) {
+	  try {
+	    var fn = this.$options.methods[custom]
+	    if (typeof fn === 'function') {
+	      val = fn.call(this, val)
+	    }
+	  } catch (e) {
+	    console.error('custom filter error:', e)
+	  }
+
+	  return val
+	}
+
+	});if (true) {
+	  module.exports = require("vue-validator");
+	} else if (typeof define == "function" && define.amd) {
+	  define([], function(){ return require("vue-validator"); });
+	} else {
+	  this["vue-validator"] = require("vue-validator");
+	}})();
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	module.exports = function (Vue) {
+
+	    Vue.filter('baseUrl', function (url) {
+	        return _.startsWith(url, Vue.url.options.root) ? url.substr(Vue.url.options.root.length) : url;
+	    });
+
+	    Vue.filter('trans', function (id, parameters, domain, locale) {
+	        return this.$trans(id, parameters, domain, locale);
+	    });
+
+	    //Vue.filter('transChoice', function (id, number, parameters, domain, locale) {
+	    //    return this.$transChoice(id, number, parameters, domain, locale);
+	    //});
+	    //
+	    //Vue.filter('date', function (date, format) {
+	    //    return this.$date(date, format);
+	    //});
+	    //
+	    //Vue.filter('toOptions', function toOptions(collection) {
+	    //    return collection ? Object.keys(collection).map(function (key) {
+	    //
+	    //        var op = collection[key];
+	    //        if (typeof op === 'string') {
+	    //            return {text: op, value: key};
+	    //        } else {
+	    //            return {label: key, options: toOptions(op)};
+	    //        }
+	    //
+	    //    }) : [];
+	    //});
+	    //
+	    //Vue.filter('trim', {
+	    //
+	    //    write: function (val) {
+	    //        return val.trim();
+	    //    }
+	    //
+	    //});
+	    //
+	    //Vue.filter('relativeDate', function (value, reference) {
+	    //    try {
+	    //        return this.$relativeDate(value, reference);
+	    //    } catch (e) {
+	    //        return 'NaN';
+	    //    }
+	    //});
+
+	};
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	module.exports = {
+
+	    twoWay: true,
+
+	    bind: function () {
+
+	        var vm = this.vm, expression = this.expression, el = $(this.el);
+
+	        el.on('change.checkbox', function () {
+
+	            var model = vm.$get(expression), contains = model.indexOf(el.val());
+
+	            if (el.prop('checked')) {
+	                if (-1 === contains) {
+	                    model.push(el.val());
+	                }
+	            } else if (-1 !== contains) {
+	                model.splice(contains, 1);
+	            }
+	        });
+
+	    },
+
+	    update: function (value) {
+
+	        if (undefined === value) {
+	            this.set([]);
+	            return;
+	        }
+
+	        $(this.el).prop('checked', -1 !== value.indexOf(this.el.value));
+	    },
+
+	    unbind: function () {
+	        $(this.el).off('.checkbox');
+	    }
+
+	};
+
+
+/***/ },
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(6),
+	    template: __webpack_require__(17),
 
 	    data: function () {
 	        return {
 	            canvasOptions: {
+	                bgColor: 'white',
 	                width: 520,
 	                height: 300
 	            },
@@ -21988,17 +23488,28 @@
 	    },
 
 	    components: {
-	        fabric_layercontrols: __webpack_require__(7),
-	        fabric_layerselect: __webpack_require__(9),
-	        fabric_figures: __webpack_require__(11),
-	        fabric_text: __webpack_require__(13),
-	        fabric_images: __webpack_require__(15),
-	        library: __webpack_require__(17)
+	        fabric_layercontrols: __webpack_require__(18),
+	        fabric_layerselect: __webpack_require__(20),
+	        fabric_figures: __webpack_require__(22),
+	        fabric_text: __webpack_require__(24),
+	        fabric_images: __webpack_require__(26),
+	        library: __webpack_require__(28)
 	    },
 
 	    ready: function () {
+
+	        this.$http.get('testdata.json', function (data, status, request) {
+
+	            console.log(data);
+	            // set data on vm
+	            //this.$set('someData', data);
+
+	        }).error(function (data, status, request) {
+	            // handle error
+	        });
+
 	        this.canvas = new fabric.Canvas(this.$$.canvas);
-	        this.canvas.setBackgroundColor('white');
+	        this.canvas.setBackgroundColor(this.canvasOptions.bgColor);
 	        this.canvas.on({
 	            'selection:cleared': this.clearActiveLayer,
 	            'object:selected': this.setActiveLayer,
@@ -22095,36 +23606,36 @@
 	};
 
 /***/ },
-/* 6 */
+/* 17 */
 /***/ function(module, exports) {
 
 	module.exports = "<div class=\"uk-margin\">\n    <div class=\"uk-width-1-1\">\n\n        <ul class=\"uk-tab\" data-uk-tab=\"{connect:'#tools-switcher'}\">\n            <li><a href=\"#\"><i class=\"uk-icon-pencil\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-font\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-image\"></i></a></li>\n        </ul>\n\n        <ul id=\"tools-switcher\" class=\"uk-switcher uk-margin\">\n            <li>\n                <fabric_figures></fabric_figures>\n            </li>\n            <li>\n                <fabric_text></fabric_text>\n            </li>\n            <li>\n                <fabric_images></fabric_images>\n            </li>\n        </ul>\n\n\n    </div>\n</div>\n\n\n<div class=\"uk-grid uk-grid-small\">\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n\n            <fabric_layercontrols></fabric_layercontrols>\n\n        </div>\n\n    </div>\n\n    <div class=\"uk-width-medium-2-4 uk-width-large-3-5\">\n\n        <div class=\"uk-panel uk-panel-box\">\n\n            <canvas v-el=\"canvas\" width=\"{{ canvasOptions.width }}\" height=\"{{ canvasOptions.height }}\"></canvas>\n\n        </div>\n\n    </div>\n\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n            <fabric_layerselect></fabric_layerselect>\n        </div>\n\n    </div>\n</div>\n\n<div class=\"uk-margin\">\n\n    <library></library>\n\n</div>\n\n<pre>{{ $data.activeLayer.fObj | json }}</pre>\n<pre>{{ $data | json }}</pre>";
 
 /***/ },
-/* 7 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(8),
+	    template: __webpack_require__(19),
 
 	    inherit: true
 
 	};
 
 /***/ },
-/* 8 */
+/* 19 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"uk-panel uk-panel-box\"\n     v-show=\"activeLayer.type\"\n        >\n    <h3 class=\"uk-panel-title\">{{ activeLayer.title}}</h3>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-width\">Width</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-width\"\n                   v-model=\"activeLayer.fObj.width\"\n                   v-on=\"input: updateValue('width')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-height\">Height</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-height\"\n                   v-model=\"activeLayer.fObj.height\"\n                   v-on=\"input: updateValue('height')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-opacity\">Opacity</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-opacity\" min=\"0\" max=\"1\" step=\"0.01\"\n                   v-model=\"activeLayer.fObj.opacity\"\n                   v-on=\"input: updateValue('opacity')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-top\">Top</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-top\" min=\"0\" max=\"{{ canvasOptions.height }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.top\"\n                   v-on=\"input: updateValue('top')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-left\">Left</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-left\" min=\"0\" max=\"{{ canvasOptions.width }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.left\"\n                   v-on=\"input: updateValue('left')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scalex\">Scale X</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scalex\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleX\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scaley\">Scale Y</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scaley\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleY\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'rectangle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-angle\">Angle</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-angle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.angle\"\n                   v-on=\"input: updateValue('angle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-endangle\">Angle c</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-endangle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.endAngle\"\n                   v-on=\"input: updateValue('endAngle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-radius\">Radius</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-radius\" min=\"0\" max=\"500\" step=\"1\"\n                   v-model=\"activeLayer.fObj.radius\"\n                   v-on=\"input: updateValue('radius')\"\n                   number>\n        </div>\n    </div>\n\n</div>\n\n\n";
+	module.exports = "\n<div class=\"uk-panel uk-panel-box\"\n     v-show=\"activeLayer.type\"\n        >\n    <h3 class=\"uk-panel-title\">{{ activeLayer.title}}</h3>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-width\">{{ 'Breedte' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-width\"\n                   v-model=\"activeLayer.fObj.width\"\n                   v-on=\"input: updateValue('width')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-height\">{{ 'Hoogte' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-height\"\n                   v-model=\"activeLayer.fObj.height\"\n                   v-on=\"input: updateValue('height')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-opacity\">{{ 'Doorlaatbaarheid' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-opacity\" min=\"0\" max=\"1\" step=\"0.01\"\n                   v-model=\"activeLayer.fObj.opacity\"\n                   v-on=\"input: updateValue('opacity')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-top\">{{ 'Top' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-top\" min=\"0\" max=\"{{ canvasOptions.height }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.top\"\n                   v-on=\"input: updateValue('top')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-left\">{{ 'Links' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-left\" min=\"0\" max=\"{{ canvasOptions.width }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.left\"\n                   v-on=\"input: updateValue('left')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scalex\">{{ 'Schaal X-as' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scalex\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleX\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scaley\">{{ 'Schaal Y-as' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scaley\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleY\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'rectangle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-angle\">{{ 'Draaihoek' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-angle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.angle\"\n                   v-on=\"input: updateValue('angle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-endangle\">{{ 'Draaihoek' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-endangle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.endAngle\"\n                   v-on=\"input: updateValue('endAngle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-radius\">{{ 'Straal' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-radius\" min=\"0\" max=\"500\" step=\"1\"\n                   v-model=\"activeLayer.fObj.radius\"\n                   v-on=\"input: updateValue('radius')\"\n                   number>\n        </div>\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
-/* 9 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(10),
+	    template: __webpack_require__(21),
 
 	    inherit: true,
 
@@ -22182,18 +23693,18 @@
 	};
 
 /***/ },
-/* 10 */
+/* 21 */
 /***/ function(module, exports) {
 
 	module.exports = "\n<ul class=\"uk-sortable uk-list uk-list-line uk-form\"\n    data-uk-sortable=\"{handleClass:'uk-sortable-handle', threshold: 1}\">\n    <li data-id=\"{{ layer.id }}\"\n        v-repeat=\"layer: layers | orderBy 'ordering' true\">\n        <div v-on=\"click: selectLayer(layer)\" class=\"uk-panel\" v-class=\"uk-panel-box-primary: layer.id == activeLayerId\">\n\n            <div class=\"uk-grid uk-grid-small uk-flex uk-flex-middle\">\n                <div class=\"uk-width-1-6 uk-text-center\">\n                    <button type=\"button\" class=\"uk-button uk-button-mini uk-sortable-handle\"><i\n                            class=\"uk-icon-bars\"></i></button>\n                </div>\n                <div class=\"uk-width-5-6\">\n\n                    <input type=\"text\" class=\"uk-form-blank uk-width-1-1\"\n                           v-model=\"layer.title\"/>\n\n                </div>\n            </div>\n\n            <div class=\"uk-width-1-1 uk-text-right\">\n                {{layer.ordering}}\n                <button type=\"button\" class=\"uk-button uk-button-danger uk-button-mini\"\n                        v-on=\"click: removeLayer(layer)\"\n                        ><i class=\"uk-icon-trash-o\"></i></button>\n            </div>\n\n        </div>\n\n    </li>\n</ul>\n";
 
 /***/ },
-/* 11 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(12),
+	    template: __webpack_require__(23),
 
 	    inherit: true,
 
@@ -22202,15 +23713,15 @@
 	            figures: [
 	                {
 	                    type: 'rectangle',
-	                    label: 'Rectangle'
+	                    label: this.$trans('Rechthoek')
 	                },
 	                {
 	                    type: 'triangle',
-	                    label: 'Triangle'
+	                    label: this.$trans('Driekhoek')
 	                },
 	                {
 	                    type: 'circle',
-	                    label: 'Circle'
+	                    label: this.$trans('Cirkel')
 	                }
 	            ]
 	        };
@@ -22264,18 +23775,18 @@
 	};
 
 /***/ },
-/* 12 */
+/* 23 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-repeat=\"figure: figures\" v-on=\"click: addFigure(figure)\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ figure.label }}\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"layercontrol-fill\">Color</label>\n\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"layercontrol-fill\"\n                           v-model=\"activeLayer.fObj.fill\"\n                           v-on=\"input: updateValue('fill')\">\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
+	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-repeat=\"figure: figures\" v-on=\"click: addFigure(figure)\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ figure.label }}\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Kleur' | trans}}</label>\n\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"layercontrol-fill\"\n                           v-model=\"activeLayer.fObj.fill\"\n                           v-on=\"input: updateValue('fill')\">\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
-/* 13 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(14),
+	    template: __webpack_require__(25),
 
 	    inherit: true,
 
@@ -22342,18 +23853,18 @@
 	};
 
 /***/ },
-/* 14 */
+/* 25 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-on=\"click: addText\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>Text</button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div v-show=\"activeLayer.type\">\n\n            <div class=\"uk-grid\">\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <div class=\"uk-form-controls\">\n                    <textarea id=\"layercontrol-text\"\n                              v-model=\"activeLayer.fObj.text\"\n                              v-on=\"input: updateValue('text')\"></textarea>\n                        </div>\n                    </div>\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fontfamily\">Font</label>\n                        <div class=\"uk-form-controls\">\n                            <select id=\"layercontrol-fontfamily\"\n                                    v-model=\"activeLayer.fObj.fontFamily\"\n                                    options=\"fonts\"\n                                    v-on=\"change: updateValue('fontFamily')\"></select>\n                        </div>\n                    </div>\n\n                </div>\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fill\">Text color</label>\n\n                        <div class=\"uk-form-controls\">\n                            <input type=\"text\" id=\"layercontrol-fill\"\n                                   v-model=\"activeLayer.fObj.fill\"\n                                   v-on=\"input: updateValue('fill')\">\n                        </div>\n                    </div>\n\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
+	module.exports = "\n<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-on=\"click: addText\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ 'Tekst' | trans}}</button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div v-show=\"activeLayer.type\">\n\n            <div class=\"uk-grid\">\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <div class=\"uk-form-controls\">\n                    <textarea id=\"layercontrol-text\"\n                              v-model=\"activeLayer.fObj.text\"\n                              v-on=\"input: updateValue('text')\"></textarea>\n                        </div>\n                    </div>\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fontfamily\">{{ 'Lettertype' | trans}}</label>\n                        <div class=\"uk-form-controls\">\n                            <select id=\"layercontrol-fontfamily\"\n                                    v-model=\"activeLayer.fObj.fontFamily\"\n                                    options=\"fonts\"\n                                    v-on=\"change: updateValue('fontFamily')\"></select>\n                        </div>\n                    </div>\n\n                </div>\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Tekstkleur' | trans}}</label>\n\n                        <div class=\"uk-form-controls\">\n                            <input type=\"text\" id=\"layercontrol-fill\"\n                                   v-model=\"activeLayer.fObj.fill\"\n                                   v-on=\"input: updateValue('fill')\">\n                        </div>\n                    </div>\n\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
-/* 15 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(16),
+	    template: __webpack_require__(27),
 
 	    inherit: true,
 
@@ -22373,8 +23884,8 @@
 	                    this.fObj = new fabric.Image(img, {
 	                        left: 10,
 	                        top: 10,
-	                        width: 120,
-	                        height: 120
+	                        width: img.width,
+	                        height: img.height
 	                    });
 	                }
 	            });
@@ -22385,18 +23896,18 @@
 	};
 
 /***/ },
-/* 16 */
+/* 27 */
 /***/ function(module, exports) {
 
 	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\"\n                    v-show=\"activeAsset.src\"\n                    v-on=\"click: addImage\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>Image\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-width-1-1\">\n            <figure class=\"uk-overlay\"\n                    v-show=\"activeAsset.src\">\n                <img v-attr=\"src: activeAsset.src\" alt=\"{{ activeAsset.filename }}\" width=\"200\" height=\"500\">\n                <figcaption class=\"uk-overlay-panel\">{{ activeAsset.title }}</figcaption>\n            </figure>\n\n        </div>\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n\n        </div>\n\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
-/* 17 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(18),
+	    template: __webpack_require__(29),
 
 	    inherit: true,
 
@@ -22430,10 +23941,10 @@
 	};
 
 /***/ },
-/* 18 */
+/* 29 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<ul class=\"uk-tab\" data-uk-tab=\"{connect:'#library-switcher'}\">\n    <li v-if=\"images.length\"><a href=\"\">Afbeeldingen</a></li>\n</ul>\n<ul id=\"library-switcher\" class=\"uk-switcher uk-margin\">\n    <li v-if=\"images.length\">\n        <ul class=\"uk-thumbnav\">\n            <li v-repeat=\"image: images\">\n                <a href=\"#\" title=\"{{ image.title }}\" v-on=\"click: selectImage(image, $event)\">\n                    <img v-attr=\"src: image.src\" alt=\"{{ image.filename }}\" width=\"100\" height=\"150\"/>\n                </a>\n            </li>\n        </ul>\n\n    </li>\n</ul>\n\n";
+	module.exports = "\n<ul class=\"uk-tab\" data-uk-tab=\"{connect:'#library-switcher'}\">\n    <li v-if=\"images.length\"><a href=\"\">{{ 'Afbeeldingen' | trans }}</a></li>\n</ul>\n<ul id=\"library-switcher\" class=\"uk-switcher uk-margin\">\n    <li v-if=\"images.length\">\n        <ul class=\"uk-thumbnav\">\n            <li v-repeat=\"image: images\">\n                <a href=\"#\" title=\"{{ image.title }}\" v-on=\"click: selectImage(image, $event)\">\n                    <img v-attr=\"src: image.src\" alt=\"{{ image.filename }}\" width=\"100\" height=\"150\"/>\n                </a>\n            </li>\n        </ul>\n\n    </li>\n</ul>\n\n";
 
 /***/ }
 /******/ ]);

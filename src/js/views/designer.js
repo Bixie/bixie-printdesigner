@@ -5,6 +5,7 @@ module.exports = {
     data: function () {
         return {
             canvasOptions: {
+                bgColor: 'white',
                 width: 520,
                 height: 300
             },
@@ -32,8 +33,19 @@ module.exports = {
     },
 
     ready: function () {
+
+        this.$http.get('testdata.json', function (data, status, request) {
+
+            console.log(data);
+            // set data on vm
+            //this.$set('someData', data);
+
+        }).error(function (data, status, request) {
+            // handle error
+        });
+
         this.canvas = new fabric.Canvas(this.$$.canvas);
-        this.canvas.setBackgroundColor('white');
+        this.canvas.setBackgroundColor(this.canvasOptions.bgColor);
         this.canvas.on({
             'selection:cleared': this.clearActiveLayer,
             'object:selected': this.setActiveLayer,

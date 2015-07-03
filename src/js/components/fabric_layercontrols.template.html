@@ -5,7 +5,7 @@
     <h3 class="uk-panel-title">{{ activeLayer.title}}</h3>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-width">Width</label>
+        <label class="uk-form-label" for="layercontrol-width">{{ 'Breedte' | trans}}</label>
         <div class="uk-form-controls">
             <input type="text" id="layercontrol-width"
                    v-model="activeLayer.fObj.width"
@@ -15,7 +15,7 @@
     </div>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-height">Height</label>
+        <label class="uk-form-label" for="layercontrol-height">{{ 'Hoogte' | trans}}</label>
         <div class="uk-form-controls">
             <input type="text" id="layercontrol-height"
                    v-model="activeLayer.fObj.height"
@@ -25,7 +25,7 @@
     </div>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-opacity">Opacity</label>
+        <label class="uk-form-label" for="layercontrol-opacity">{{ 'Doorlaatbaarheid' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-opacity" min="0" max="1" step="0.01"
                    v-model="activeLayer.fObj.opacity"
@@ -35,7 +35,7 @@
     </div>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-top">Top</label>
+        <label class="uk-form-label" for="layercontrol-top">{{ 'Top' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-top" min="0" max="{{ canvasOptions.height }}" step="1"
                    v-model="activeLayer.fObj.top"
@@ -45,7 +45,7 @@
     </div>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-left">Left</label>
+        <label class="uk-form-label" for="layercontrol-left">{{ 'Links' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-left" min="0" max="{{ canvasOptions.width }}" step="1"
                    v-model="activeLayer.fObj.left"
@@ -55,7 +55,7 @@
     </div>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-scalex">Scale X</label>
+        <label class="uk-form-label" for="layercontrol-scalex">{{ 'Schaal X-as' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-scalex" min="0" max="3" step="0.1"
                    v-model="activeLayer.fObj.scaleX"
@@ -65,7 +65,7 @@
     </div>
 
     <div class="uk-form-row">
-        <label class="uk-form-label" for="layercontrol-scaley">Scale Y</label>
+        <label class="uk-form-label" for="layercontrol-scaley">{{ 'Schaal Y-as' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-scaley" min="0" max="3" step="0.1"
                    v-model="activeLayer.fObj.scaleY"
@@ -75,7 +75,7 @@
     </div>
 
     <div class="uk-form-row" v-if="activeLayer.type == 'rectangle'">
-        <label class="uk-form-label" for="layercontrol-angle">Angle</label>
+        <label class="uk-form-label" for="layercontrol-angle">{{ 'Draaihoek' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-angle" min="0" max="360" step="1"
                    v-model="activeLayer.fObj.angle"
@@ -85,7 +85,7 @@
     </div>
 
     <div class="uk-form-row" v-if="activeLayer.type == 'circle'">
-        <label class="uk-form-label" for="layercontrol-endangle">Angle c</label>
+        <label class="uk-form-label" for="layercontrol-endangle">{{ 'Draaihoek' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-endangle" min="0" max="360" step="1"
                    v-model="activeLayer.fObj.endAngle"
@@ -95,7 +95,7 @@
     </div>
 
     <div class="uk-form-row" v-if="activeLayer.type == 'circle'">
-        <label class="uk-form-label" for="layercontrol-radius">Radius</label>
+        <label class="uk-form-label" for="layercontrol-radius">{{ 'Straal' | trans}}</label>
         <div class="uk-form-controls">
             <input type="range" id="layercontrol-radius" min="0" max="500" step="1"
                    v-model="activeLayer.fObj.radius"

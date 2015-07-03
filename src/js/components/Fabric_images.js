@@ -20,8 +20,8 @@ module.exports = {
                     this.fObj = new fabric.Image(img, {
                         left: 10,
                         top: 10,
-                        width: 120,
-                        height: 120
+                        width: img.width,
+                        height: img.height
                     });
                 }
             });

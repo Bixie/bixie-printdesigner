@@ -5,7 +5,7 @@
         <div class="uk-button-group">
 
             <button type="button" class="uk-button" v-on="click: addText"><i
-                    class="uk-icon-plus uk-margin-small-right"></i>Text</button>
+                    class="uk-icon-plus uk-margin-small-right"></i>{{ 'Tekst' | trans}}</button>
 
         </div>
 
@@ -26,7 +26,7 @@
                     </div>
 
                     <div class="uk-form-row" v-if="activeLayer.type == 'text'">
-                        <label class="uk-form-label" for="layercontrol-fontfamily">Font</label>
+                        <label class="uk-form-label" for="layercontrol-fontfamily">{{ 'Lettertype' | trans}}</label>
                         <div class="uk-form-controls">
                             <select id="layercontrol-fontfamily"
                                     v-model="activeLayer.fObj.fontFamily"
@@ -39,7 +39,7 @@
                 <div class="uk-width-medium-1-2">
 
                     <div class="uk-form-row">
-                        <label class="uk-form-label" for="layercontrol-fill">Text color</label>
+                        <label class="uk-form-label" for="layercontrol-fill">{{ 'Tekstkleur' | trans}}</label>
 
                         <div class="uk-form-controls">
                             <input type="text" id="layercontrol-fill"

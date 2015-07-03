@@ -4,7 +4,8 @@
   "dependencies": {
     "lodash": "~3.9.0",
     "uikit": "#master",
-    "vue": "~0.12.1",
+    "vue": "~0.12.5",
+    "vue-validator": "~0.1.1",
     "vue-resource": "~0.1.0"
   },
   "devDependencies": {
