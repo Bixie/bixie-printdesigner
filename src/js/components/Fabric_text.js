@@ -51,7 +51,8 @@ module.exports = {
                 onSetFabricObject: function () {
                     this.fObj = new fabric.Text($this.defaultText, {
                         left: 10,
-                        top: 10
+                        top: 10,
+                        fill: '#000000'
                     });
                 },
                 onUpdateValue: function (controlType) {

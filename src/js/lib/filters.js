@@ -8,6 +8,10 @@ module.exports = function (Vue) {
         return this.$trans(id, parameters, domain, locale);
     });
 
+    Vue.filter('snake', function (str) {
+        return _.snakeCase(str);
+    });
+
     //Vue.filter('transChoice', function (id, number, parameters, domain, locale) {
     //    return this.$transChoice(id, number, parameters, domain, locale);
     //});

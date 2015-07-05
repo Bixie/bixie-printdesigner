@@ -1,3 +1,33 @@
+<div class="uk-panel uk-panel-box uk-panel-box">
+    <div class="uk-grid uk-grid-small">
+        <div class="uk-width-1-4">
+settings canvas
+        </div>
+        <div class="uk-width-1-2">
+            <div class="uk-form-row">
+                <label class="uk-form-label" for="design-name">{{ 'Naam design' | trans}}</label>
+                <div class="uk-form-controls">
+                    <input type="text" id="design-name" class="uk-form-large uk-form-blank uk-width-1-1"
+                           v-model="projectName"
+                           v-on="change: saveState"/>
+                </div>
+            </div>
+
+        </div>
+        <div class="uk-width-1-4">
+
+            <div class="uk-margin">
+                <fabric_state></fabric_state>
+            </div>
+            <div class="uk-margin">
+                <fabric_export></fabric_export>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
 <div class="uk-margin">
     <div class="uk-width-1-1">
 
@@ -56,7 +86,7 @@
 
 <div class="uk-margin">
 
-    <library></library>
+    <fabric_library></fabric_library>
 
 </div>
 

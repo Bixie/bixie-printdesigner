@@ -1,6 +1,6 @@
 module.exports = function install(Vue) {
 
-    Vue.$bixConfig = window.$bixConfig || {csrf: '', url: ''};
+    var $bixConfig = window.$bixConfig || {csrf: '', url: '', prefix: 'bpd', saveStateDebounceTime: 750};
     /**
      * Libraries/plugins
      */
@@ -25,15 +25,14 @@ module.exports = function install(Vue) {
      * Directives
      */
 
-
-    //Vue.directive('colorpicker', require('./directives/colorpicker'));
+    Vue.directive('confirm', require('./directives/confirm'));
 
     /**
      * Resource
      */
 
-    Vue.url.options.root = Vue.$bixConfig.url;
+    Vue.url.options.root = $bixConfig.url;
     Vue.http.options.emulateHTTP = true;
-    Vue.http.options.headers = {'X-XSRF-TOKEN': Vue.$bixConfig.csrf};
+    Vue.http.options.headers = {'X-XSRF-TOKEN': $bixConfig.csrf};
 
 };

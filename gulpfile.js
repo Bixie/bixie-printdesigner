@@ -25,10 +25,10 @@ gulp.task("build", ["webpack:build"]);
 gulp.task("webpack:build", function (callback) {
     // modify some webpack config options
     var myConfig = Object.create(webpackConfig);
-    myConfig.plugins = myConfig.plugins.concat(
-        new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.UglifyJsPlugin()
-    );
+    //myConfig.plugins = myConfig.plugins.concat(
+    //    new webpack.optimize.DedupePlugin(),
+    //    new webpack.optimize.UglifyJsPlugin()
+    //);
 
     // run webpack
     webpack(myConfig, function (err, stats) {

@@ -13,7 +13,7 @@ module.exports = {
                 },
                 {
                     type: 'triangle',
-                    label: this.$trans('Driekhoek')
+                    label: this.$trans('Driehoek')
                 },
                 {
                     type: 'circle',

@@ -31,6 +31,9 @@ exports.install = function (Vue) {
                 this.onUpdateValue(controlType);
             }
             this.fObj.setCoords();
+        },
+        _toObject: function () {
+            return _.extend({}, this, {fObj: null});
         }
 
     });
@@ -38,7 +41,9 @@ exports.install = function (Vue) {
     Vue.prototype.$getLayer = function (type, layerObj) {
         var layer = new Layer(type, layerObj);
         _.extend(layer, layerObj);
-        layer.setFabricObject();
+        if (layerObj.fObj === undefined) { //only on empty new instance
+            layer.setFabricObject();
+        }
         return layer;
     };
 };

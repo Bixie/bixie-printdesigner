@@ -1,4 +1,6 @@
-var _util = require('../lib/util');
+var _util = require('../lib/util'); //todo why is _ available, and _uitl not??
+//mixins
+var stateMixin = require('../mixins/state.mixin'); //todo I want this in app.js
 
 module.exports = {
 
@@ -8,6 +10,7 @@ module.exports = {
         return {
             projectName: this.$trans('Project 1'),
             projectID: _util.randomId(),
+            bixConfig: window.$bixConfig || {csrf: '', url: '', prefix: 'bpd', saveStateDebounceTime: 750},
             canvasOptions: {
                 bgColor: 'white',
                 width: 520,
@@ -34,11 +37,12 @@ module.exports = {
         fabric_images: require('../components/Fabric_images'),
         fabric_export: require('../components/Fabric_export.vue'),
         fabric_state: require('../components/Fabric_state.vue'),
-        library: require('../components/Library')
+        fabric_library: require('../components/Fabric_library')
     },
 
+    mixins: [stateMixin],
+
     created: function () {
-        console.log(this.$data);
         this.$http.get('testdata.json', function (data, status, request) {
 
             console.log(data);
@@ -65,6 +69,7 @@ module.exports = {
             //'object:rotating': this.setActiveLayer
         });
         this.updateCanvas();
+        console.log('loaded.bps.canvas');
         this.$broadcast('loaded.bps.canvas');
     },
 
@@ -109,15 +114,32 @@ module.exports = {
         clearActiveLayer: function () {
             this.activeLayerId = '';
         },
+        /**
+         * clear complete canvas
+         */
+        clearCanvas: function () {
+            this.clearActiveLayer();
+            this.layers = [];
+            this.canvas.clear();
+        },
+        /**
+         * triggered from canvas
+         * @param e
+         */
         updateControls: function (e) {
             var fObj = e.target;
             if (this.activeLayer.fObj === fObj) { //just to make sure
                 //this.activeLayer.fObj.scaleX = fObj.getScaleX();
                 //this.activeLayer.fObj.scaleY = fObj.getScaleY();
-                console.log(fObj.scaleX, fObj.scaleY);
-                console.log(this.activeLayer.fObj.scaleX, this.activeLayer.fObj.scaleY);
+                //console.log(fObj.scaleX, fObj.scaleY);
+                //console.log(this.activeLayer.fObj.scaleX, this.activeLayer.fObj.scaleY);
             }
         },
+        /**
+         * add layer to canvas and data
+         * @param layer
+         * @private
+         */
         _removeLayer: function (layer) {
             this.layers = _.remove(this.layers, function (n) {
                 return n.id !== layer.id;
@@ -127,15 +149,67 @@ module.exports = {
             }
             this.canvas.fxRemove(layer.fObj);
         },
+        /**
+         * remove layer from canvas and data
+         * @param layer
+         * @private
+         */
         _addLayer: function (layer) {
             layer.ordering = this.layers.length + 1;
             this.layers.push(layer);
             this.canvas.add(layer.fObj);
             this.activeLayerId = layer.id;
+        },
+        /**
+         * clone to object for storage
+         * @returns {{projectName: *, projectID: *, canvasOptions: *, layers: Array, canvas: (Object|*)}}
+         * @private
+         * todo get it more generic
+         */
+        _toObject: function () {
+            var obj = {
+                projectName: this.projectName,
+                projectID: this.projectID,
+                canvasOptions: this.canvasOptions,
+                layers: [],
+                canvas: this.canvas.toDatalessJSON()
+            };
+            this.layers.forEach(function (layer) {
+                obj.layers.push(layer._toObject());
+            });
+            return obj;
+        },
+        /**
+         * load object from storage
+         * @param data
+         * @private
+         * todo get it more generic
+         */
+        _loadFromObject: function (data) {
+            var $this = this;
+            ['projectName', 'projectID', 'canvasOptions'].forEach(function (key) {
+                $this.$set(key, data[key]);
+            });
+            this.layers = [];
+            if (this.canvas) {
+                this.canvas.loadFromDatalessJSON(data.canvas, function () {
+                    data.layers.forEach(function (layerData, idx) {
+                        var layer = $this.$getLayer(layerData.type, layerData);
+                        layer.fObj = $this.canvas._objects[idx]; //todo proper match to layer in canvas
+                        $this.layers.push(layer);
+                    });
+                });
+            }
+
         }
+
     },
 
     watch: {
+        /**
+         * set reference to activelayer in canvas to this.activeLayer
+         * @param val
+         */
         'activeLayerId': function (val) {
             var layer;
             if (val) {
