@@ -1,6 +1,12 @@
+<template>
+    <input type="color" v-el="picker" id="{{ id }}" v-value="{{ modelValue }}" v-on="change: updateValue(this.type)" >
+</template>
+
+<script>
+
 module.exports = {
 
-    template: '<input type="color" v-el="picker" id="{{ id }}" v-value="{{ modelValue }}" v-on="change: updateValue(this.type)" >',
+    template: '',
 
     props: ['id', 'type', 'model-value', 'update-parent'],
 
@@ -26,3 +32,5 @@ module.exports = {
     }
 
 };
+
+</script>

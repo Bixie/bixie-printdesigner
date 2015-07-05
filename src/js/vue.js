@@ -19,7 +19,7 @@ module.exports = function install(Vue) {
      */
 
     //Vue.component('v-pagination', require('./components/pagination'));
-    Vue.component('colorpicker', require('./components/colorpicker.js'));
+    Vue.component('colorpicker', require('./components/colorpicker.vue'));
 
     /**
      * Directives
