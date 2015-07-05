@@ -19,9 +19,9 @@
                 <label class="uk-form-label" for="layercontrol-fill">{{ 'Kleur' | trans}}</label>
 
                 <div class="uk-form-controls">
-                    <input type="text" id="layercontrol-fill"
-                           v-model="activeLayer.fObj.fill"
-                           v-on="input: updateValue('fill')">
+                    <colorpicker type="fill" id="layercontrol-fill"
+                                 model-value="{{ activeLayer.fObj.fill }}"
+                                 update-parent="{{ setFill }}"></colorpicker>
                 </div>
             </div>
 

@@ -130,13 +130,16 @@ module.exports = {
             if (val) {
                 layer = _.find(this.layers, 'id', val);
                 this.canvas.setActiveObject(layer.fObj);
+                this.$set('activeLayer', layer);
+                this.$broadcast('set.bps.activelayer', [layer.id]);
             } else {
-                layer = {
+                this.$set('activeLayer', {
+                    id: '',
                     type: false,
                     fObj: {}
-                };
+                });
+                this.$broadcast('clear.bps.activelayer');
             }
-            this.$set('activeLayer', layer);
         }
     }
 };

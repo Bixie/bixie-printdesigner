@@ -25351,14 +25351,14 @@
 	     */
 
 	    //Vue.component('v-pagination', require('./components/pagination'));
-	    //Vue.component('v-loader', require('./components/loader.vue'));
+	    Vue.component('colorpicker', __webpack_require__(16));
 
 	    /**
 	     * Directives
 	     */
 
 
-	    Vue.directive('checkbox', __webpack_require__(16));
+	    //Vue.directive('colorpicker', require('./directives/colorpicker'));
 
 	    /**
 	     * Resource
@@ -26826,43 +26826,32 @@
 
 	module.exports = {
 
-	    twoWay: true,
+	    template: '<input type="color" v-el="picker" id="{{ id }}" v-value="{{ modelValue }}" v-on="change: updateValue(this.type)" >',
 
-	    bind: function () {
+	    props: ['id', 'type', 'model-value', 'update-parent'],
 
-	        var vm = this.vm, expression = this.expression, el = $(this.el);
+	    ready: function () {
+	        //this.$$.picker.value = this.$parent.$get(this.model);
+	        console.log(this.modelValue);
+	        console.log(this.type);
+	        console.log(this.updateParent);
 
-	        el.on('change.checkbox', function () {
-
-	            var model = vm.$get(expression), contains = model.indexOf(el.val());
-
-	            if (el.prop('checked')) {
-	                if (-1 === contains) {
-	                    model.push(el.val());
-	                }
-	            } else if (-1 !== contains) {
-	                model.splice(contains, 1);
-	            }
-	        });
-
+	        this.$on('set.bps.activelayer', function (layerID) {
+	            this.$$.picker.value = this.modelValue;
+	        }.bind(this));
 	    },
 
-	    update: function (value) {
+	    methods: {
+	        updateValue: function (type) {
 
-	        if (undefined === value) {
-	            this.set([]);
-	            return;
+	            this.modelValue = this.$$.picker.value;
+	            console.log(type, this.modelValue);
+	            this.updateParent(type, this.modelValue); //todo why can't this be bound to a getter/setter in $parent
+
 	        }
-
-	        $(this.el).prop('checked', -1 !== value.indexOf(this.el.value));
-	    },
-
-	    unbind: function () {
-	        $(this.el).off('.checkbox');
 	    }
 
 	};
-
 
 /***/ },
 /* 17 */
@@ -27000,13 +26989,16 @@
 	            if (val) {
 	                layer = _.find(this.layers, 'id', val);
 	                this.canvas.setActiveObject(layer.fObj);
+	                this.$set('activeLayer', layer);
+	                this.$broadcast('set.bps.activelayer', [layer.id]);
 	            } else {
-	                layer = {
+	                this.$set('activeLayer', {
+	                    id: '',
 	                    type: false,
 	                    fObj: {}
-	                };
+	                });
+	                this.$broadcast('clear.bps.activelayer');
 	            }
-	            this.$set('activeLayer', layer);
 	        }
 	    }
 	};
@@ -27026,6 +27018,8 @@
 	    template: __webpack_require__(20),
 
 	    inherit: true
+
+	    //todo fix scale/transp etc controls!
 
 	};
 
@@ -27146,6 +27140,13 @@
 
 	        },
 
+	        setFill: function (controlType, value) {
+	            if (controlType === 'fill') {
+	                this.activeLayer.fObj.setFill(value);
+	                this.updateValue(controlType);
+	            }
+	        },
+
 	        getLayerObject: function (figure) {
 
 	            return this.$getLayer(figure.type, {
@@ -27157,7 +27158,7 @@
 	                            left: 100,
 	                            width: 60,
 	                            height: 70,
-	                            fill: 'blue'
+	                            fill: '#00ff00'
 	                        });
 	                        break;
 	                    case 'triangle':
@@ -27166,7 +27167,7 @@
 	                            left: 120,
 	                            width: 60,
 	                            height: 70,
-	                            fill: 'red'
+	                            fill: '#ff0000'
 	                        });
 	                        break;
 	                    case 'circle':
@@ -27174,10 +27175,12 @@
 	                            top: 80,
 	                            left: 100,
 	                            radius: 30,
-	                            fill: 'yellow'
+	                            fill: '#0000ff'
 	                        });
 	                        break;
 	                    }
+	                },
+	                onUpdateValue: function (controlType) {
 	                }
 	            });
 
@@ -27189,7 +27192,7 @@
 /* 24 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-repeat=\"figure: figures\" v-on=\"click: addFigure(figure)\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ figure.label }}\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Kleur' | trans}}</label>\n\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"layercontrol-fill\"\n                           v-model=\"activeLayer.fObj.fill\"\n                           v-on=\"input: updateValue('fill')\">\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
+	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-repeat=\"figure: figures\" v-on=\"click: addFigure(figure)\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ figure.label }}\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Kleur' | trans}}</label>\n\n                <div class=\"uk-form-controls\">\n                    <colorpicker type=\"fill\" id=\"layercontrol-fill\"\n                                 model-value=\"{{ activeLayer.fObj.fill }}\"\n                                 update-parent=\"{{ setFill }}\"></colorpicker>\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
 /* 25 */
@@ -27259,7 +27262,15 @@
 	            });
 
 	            this._addLayer(obj);
+	        },
+
+	        setFill: function (controlType, value) {
+	            if (controlType === 'fill') {
+	                this.activeLayer.fObj.setFill(value);
+	                this.updateValue(controlType);
+	            }
 	        }
+
 	    }
 	};
 
@@ -27267,7 +27278,7 @@
 /* 26 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-on=\"click: addText\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ 'Tekst' | trans}}</button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div v-show=\"activeLayer.type\">\n\n            <div class=\"uk-grid\">\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <div class=\"uk-form-controls\">\n                    <textarea id=\"layercontrol-text\"\n                              v-model=\"activeLayer.fObj.text\"\n                              v-on=\"input: updateValue('text')\"></textarea>\n                        </div>\n                    </div>\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fontfamily\">{{ 'Lettertype' | trans}}</label>\n                        <div class=\"uk-form-controls\">\n                            <select id=\"layercontrol-fontfamily\"\n                                    v-model=\"activeLayer.fObj.fontFamily\"\n                                    options=\"fonts\"\n                                    v-on=\"change: updateValue('fontFamily')\"></select>\n                        </div>\n                    </div>\n\n                </div>\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Tekstkleur' | trans}}</label>\n\n                        <div class=\"uk-form-controls\">\n                            <input type=\"text\" id=\"layercontrol-fill\"\n                                   v-model=\"activeLayer.fObj.fill\"\n                                   v-on=\"input: updateValue('fill')\">\n                        </div>\n                    </div>\n\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
+	module.exports = "\n<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-on=\"click: addText\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ 'Tekst' | trans}}</button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div v-show=\"activeLayer.type\">\n\n            <div class=\"uk-grid\">\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <div class=\"uk-form-controls\">\n                    <textarea id=\"layercontrol-text\"\n                              v-model=\"activeLayer.fObj.text\"\n                              v-on=\"input: updateValue('text')\"></textarea>\n                        </div>\n                    </div>\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fontfamily\">{{ 'Lettertype' | trans}}</label>\n                        <div class=\"uk-form-controls\">\n                            <select id=\"layercontrol-fontfamily\"\n                                    v-model=\"activeLayer.fObj.fontFamily\"\n                                    options=\"fonts\"\n                                    v-on=\"change: updateValue('fontFamily')\"></select>\n                        </div>\n                    </div>\n\n                </div>\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Tekstkleur' | trans}}</label>\n\n                        <div class=\"uk-form-controls\">\n                            <colorpicker type=\"fill\" id=\"layercontrol-fill\"\n                                         model-value=\"{{ activeLayer.fObj.fill }}\"\n                                         update-parent=\"{{ setFill }}\"></colorpicker>\n                        </div>\n                    </div>\n\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
 /* 27 */

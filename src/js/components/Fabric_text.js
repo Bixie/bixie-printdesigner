@@ -62,6 +62,14 @@ module.exports = {
             });
 
             this._addLayer(obj);
+        },
+
+        setFill: function (controlType, value) {
+            if (controlType === 'fill') {
+                this.activeLayer.fObj.setFill(value);
+                this.updateValue(controlType);
+            }
         }
+
     }
 };

@@ -31,6 +31,13 @@ module.exports = {
 
         },
 
+        setFill: function (controlType, value) {
+            if (controlType === 'fill') {
+                this.activeLayer.fObj.setFill(value);
+                this.updateValue(controlType);
+            }
+        },
+
         getLayerObject: function (figure) {
 
             return this.$getLayer(figure.type, {
@@ -42,7 +49,7 @@ module.exports = {
                             left: 100,
                             width: 60,
                             height: 70,
-                            fill: 'blue'
+                            fill: '#00ff00'
                         });
                         break;
                     case 'triangle':
@@ -51,7 +58,7 @@ module.exports = {
                             left: 120,
                             width: 60,
                             height: 70,
-                            fill: 'red'
+                            fill: '#ff0000'
                         });
                         break;
                     case 'circle':
@@ -59,10 +66,12 @@ module.exports = {
                             top: 80,
                             left: 100,
                             radius: 30,
-                            fill: 'yellow'
+                            fill: '#0000ff'
                         });
                         break;
                     }
+                },
+                onUpdateValue: function (controlType) {
                 }
             });
 

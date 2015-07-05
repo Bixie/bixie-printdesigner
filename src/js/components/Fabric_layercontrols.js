@@ -4,4 +4,6 @@ module.exports = {
 
     inherit: true
 
+    //todo fix scale/transp etc controls!
+
 };
