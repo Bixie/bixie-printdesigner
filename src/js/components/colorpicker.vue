@@ -1,21 +1,14 @@
 <template>
-    <input type="color" v-el="picker" id="{{ id }}" v-value="{{ modelValue }}" v-on="change: updateValue(this.type)" >
+    <input type="color" v-el="picker" id="{{ id }}" v-on="change: updateValue(this.type)" >
 </template>
 
 <script>
 
 module.exports = {
 
-    template: '',
-
     props: ['id', 'type', 'model-value', 'update-parent'],
 
     ready: function () {
-        //this.$$.picker.value = this.$parent.$get(this.model);
-        console.log(this.modelValue);
-        console.log(this.type);
-        console.log(this.updateParent);
-
         this.$on('set.bps.activelayer', function (layerID) {
             this.$$.picker.value = this.modelValue;
         }.bind(this));
