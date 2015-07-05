@@ -1,21 +1,8 @@
 exports.install = function (Vue) {
+    var _util = require('../lib/util');
 
-    function guid() {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000)
-                .toString(16)
-                .substring(1);
-        }
-        return s4() + s4() + '-' + s4();
-    }
-
-    var layerDataDefaults = {
-            url: '',
-            text: ''
-        },
-
-        Layer = function Layer(type) {
-            this.id = guid();
+    var Layer = function Layer(type) {
+            this.id = _util.randomId();
             this.title = type + ' layer';
             this.type = type;
             this.ordering = 0;
@@ -30,7 +17,7 @@ exports.install = function (Vue) {
                 this.fObj = new fabric.Text('No object set', {
                     left: 10,
                     top: 10,
-                    fill: 'red'
+                    fill: '#ff0000'
                 });
             }
         },

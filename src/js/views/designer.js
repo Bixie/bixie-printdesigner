@@ -1,9 +1,13 @@
+var _util = require('../lib/util');
+
 module.exports = {
 
     template: require('../templates/designer.template.html'),
 
     data: function () {
         return {
+            projectName: this.$trans('Project 1'),
+            projectID: _util.randomId(),
             canvasOptions: {
                 bgColor: 'white',
                 width: 520,
@@ -18,8 +22,7 @@ module.exports = {
                 type: false,
                 fObj: {}
             },
-            canvas: null,
-            output: {}
+            canvas: null
         };
     },
 
@@ -29,11 +32,13 @@ module.exports = {
         fabric_figures: require('../components/Fabric_figures'),
         fabric_text: require('../components/Fabric_text'),
         fabric_images: require('../components/Fabric_images'),
+        fabric_export: require('../components/Fabric_export.vue'),
+        fabric_state: require('../components/Fabric_state.vue'),
         library: require('../components/Library')
     },
 
-    ready: function () {
-
+    created: function () {
+        console.log(this.$data);
         this.$http.get('testdata.json', function (data, status, request) {
 
             console.log(data);
@@ -43,6 +48,11 @@ module.exports = {
         }).error(function (data, status, request) {
             // handle error
         });
+
+
+    },
+
+    ready: function () {
 
         this.canvas = new fabric.Canvas(this.$$.canvas);
         this.canvas.setBackgroundColor(this.canvasOptions.bgColor);
@@ -55,6 +65,7 @@ module.exports = {
             //'object:rotating': this.setActiveLayer
         });
         this.updateCanvas();
+        this.$broadcast('loaded.bps.canvas');
     },
 
     filters: {
