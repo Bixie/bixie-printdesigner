@@ -8,4 +8,9 @@
 /vendor
 /html
 /public/images
-/public/cockpit
+/public/cockpit/*
+!/public/cockpit/modules
+/public/cockpit/modules/*
+!/public/cockpit/modules/addons
+/public/cockpit/modules/addons/*
+!/public/cockpit/modules/addons/Printdesigner

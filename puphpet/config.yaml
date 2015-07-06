@@ -10,7 +10,7 @@ vagrantfile:
         network:
             private_network: 192.168.56.101
             forwarded_port:
-                vflnp_7ry3sv96qfyx:
+                vflnp_bqoc2r7m7w1e:
                     host: '5421'
                     guest: '22'
         post_up_message: ''
@@ -33,7 +33,7 @@ vagrantfile:
                     - '--hiera_config /vagrant/puphpet/puppet/hiera.yaml'
                     - '--parser future'
         synced_folder:
-            vflsf_j9xoxddsxol5:
+            vflsf_a9hm4ak9nvin:
                 source: ./
                 target: /var/www
                 sync_type: default
@@ -88,7 +88,7 @@ nginx:
         proxy_buffers: '4 256k'
     upstreams: {  }
     vhosts:
-        nxv_omwrzsqtkoea:
+        nxv_iwary3st7nvu:
             server_name: awesome.dev
             server_aliases:
                 - www.awesome.dev
@@ -108,7 +108,7 @@ nginx:
             rewrite_to_https: '1'
             spdy: '1'
             locations:
-                nxvl_k4uejmxpfyt3:
+                nxvl_2dkomm58hmb8:
                     location: /
                     autoindex: off
                     try_files:
@@ -118,7 +118,7 @@ nginx:
                     fastcgi: ''
                     fastcgi_index: ''
                     fastcgi_split_path: ''
-                nxvl_u66gshopzoag:
+                nxvl_u3txbgweb7qb:
                     location: '~ \.php$'
                     autoindex: off
                     try_files:
@@ -145,7 +145,7 @@ apache:
         - proxy_fcgi
         - rewrite
     vhosts:
-        av_wku5cunlxjcj:
+        av_hpiy038dun6n:
             servername: printdesigner.dev
             serveraliases:
                 - www.printdesigner.dev
@@ -162,7 +162,7 @@ apache:
             ssl_protocol: ''
             ssl_cipher: ''
             directories:
-                avd_5zmdsj2jvv6r:
+                avd_nowu5edt3e05:
                     path: /var/www/public
                     options:
                         - Indexes
@@ -174,7 +174,7 @@ apache:
                         - 'all granted'
                     custom_fragment: ''
                     files_match:
-                        avdfm_uwmq0yohe0rv:
+                        avdfm_0cajqscw2wwa:
                             path: \.php$
                             sethandler: 'proxy:fcgi://127.0.0.1:9000'
                             custom_fragment: ''
@@ -202,7 +202,7 @@ php:
     fpm_ini:
         error_log: /var/log/php-fpm.log
     fpm_pools:
-        phpfp_wl50f6lgdj51:
+        phpfp_qrn09ekasdjo:
             ini:
                 prefix: www
                 listen: '127.0.0.1:9000'
@@ -275,15 +275,15 @@ mysql:
         override_options: {  }
     adminer: 0
     users:
-        mysqlnu_bwxghscdw0an:
+        mysqlnu_0bb3w4w69szv:
             name: printdesigner
             password: printdesigner1234
     databases:
-        mysqlnd_du22x5198bew:
+        mysqlnd_x28g4nj3fbl3:
             name: printdesigner
             sql: ''
     grants:
-        mysqlng_ijbc9kktm0km:
+        mysqlng_ibk6t677pi1t:
             user: printdesigner
             table: '*.*'
             privileges:
@@ -301,7 +301,7 @@ postgresql:
     grants: {  }
     adminer: 0
 mongodb:
-    install: '0'
+    install: '1'
     settings:
         auth: 1
         bind_ip: 127.0.0.1
@@ -312,7 +312,7 @@ redis:
     settings:
         conf_port: '6379'
 sqlite:
-    install: '0'
+    install: '1'
     adminer: 0
     databases: {  }
 mailcatcher:

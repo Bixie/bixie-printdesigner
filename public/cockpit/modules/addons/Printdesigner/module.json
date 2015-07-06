@@ -1,0 +1,8 @@
+{
+  "name"       : "Printdesigner",
+  "version"    : "1.0",
+  "description": "Printdesigner serverside",
+  "homepage"   : "http://www.bixie.nl",
+  "repo"       : "https://github.com/Bixie/bixie-printdesigner",
+  "license"    : "MIT"
+}
