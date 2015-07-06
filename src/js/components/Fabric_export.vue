@@ -6,6 +6,7 @@
         <i class="uk-icon-arrow-right uk-margin-small-right"></i>{{ 'Exporteer' | trans }}</button>
 
     <div class="uk-margin">
+        <i class="uk-icon-spinner uk-icon-spin" v-show="spinning"></i>
         <div class="uk-button-group">
 
             <a class="uk-button uk-button-small" href="" target="_blank"
@@ -29,7 +30,11 @@
 
 module.exports = {
 
-    props: [],
+    data: function () {
+        return {
+            spinning: false
+        }
+    },
 
     inherit: true,
 
@@ -78,6 +83,7 @@ module.exports = {
             this.canvas.discardActiveGroup();
             this.canvas.discardActiveObject();
 
+            this.spinning = true;
             this.$set('pdf_path', '');
             this.$set('svg_path', '');
 
@@ -97,6 +103,7 @@ module.exports = {
                         this.$set('pdf_path', ret.data.pdf_path);
                         this.$set('svg_path', ret.data.svg_path);
                         this.$set('extID', ret.data.extID);
+                        this.spinning = false;
                     }
 
             }.bind(this)).error(function (data, status, request) {

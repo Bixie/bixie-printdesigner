@@ -27236,10 +27236,14 @@
 /* 34 */
 /***/ function(module, exports) {
 
-	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <button type=\"button\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\">\n        <i class=\"uk-icon-arrow-right uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</button>\n\n    <div class=\"uk-margin\">\n        <div class=\"uk-button-group\">\n            <a class=\"uk-button uk-button-small\" href=\"\" target=\"_blank\" v-show=\"svg_path\" v-attr=\"href: svg_path\">\n                <i class=\"uk-icon-file-code-o uk-margin-small-right\"></i>{{ 'SVG' | trans }}</a>\n\n            <a class=\"uk-button uk-button-small\" href=\"\" target=\"_blank\" v-show=\"pdf_path\" v-attr=\"href: pdf_path\">\n                <i class=\"uk-icon-file-pdf-o uk-margin-small-right\"></i>{{ 'PDF' | trans }}</a>\n        </div>\n    </div>";
+	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <button type=\"button\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\">\n        <i class=\"uk-icon-arrow-right uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</button>\n\n    <div class=\"uk-margin\">\n        <i class=\"uk-icon-spinner uk-icon-spin\" v-show=\"spinning\"></i>\n        <div class=\"uk-button-group\">\n\n            <a class=\"uk-button uk-button-small\" href=\"\" target=\"_blank\" v-show=\"pdf_path\" v-attr=\"href: pdf_path\">\n                <i class=\"uk-icon-file-pdf-o uk-margin-small-right\"></i>{{ 'PDF' | trans }}</a>\n\n            <a class=\"uk-button uk-button-small\" href=\"\" target=\"_blank\" v-show=\"svg_path\" v-attr=\"href: svg_path\">\n                <i class=\"uk-icon-file-code-o uk-margin-small-right\"></i>{{ 'SVG' | trans }}</a>\n        </div>\n    </div>";
 	module.exports = {
 
-	    props: [],
+	    data: function () {
+	        return {
+	            spinning: false
+	        }
+	    },
 
 	    inherit: true,
 
@@ -27287,7 +27291,8 @@
 
 	            this.canvas.discardActiveGroup();
 	            this.canvas.discardActiveObject();
-
+	            this.spinning = true;
+	            this.$set('pdf_path', '');
 	            this.$set('svg_path', '');
 
 	            this.$http.post('export', {
@@ -27306,6 +27311,7 @@
 	                        this.$set('pdf_path', ret.data.pdf_path);
 	                        this.$set('svg_path', ret.data.svg_path);
 	                        this.$set('extID', ret.data.extID);
+	                        this.spinning = false;
 	                    }
 
 	            }.bind(this)).error(function (data, status, request) {
