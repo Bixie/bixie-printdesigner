@@ -1,4 +1,11 @@
 /.idea
-/vendor
+/.vagrant
 /node_modules
+/puphpet.zip
+/puphpet/*
+!/puphpet/config.yaml
+
+/vendor
+/html
 /public/images
+/public/cockpit
