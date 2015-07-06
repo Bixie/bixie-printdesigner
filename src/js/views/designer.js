@@ -8,6 +8,7 @@ module.exports = {
 
     data: function () {
         return {
+            extID: 0, //external id
             projectName: this.$trans('Project 1'),
             projectID: _util.randomId(),
             bixConfig: window.$bixConfig,
@@ -16,6 +17,7 @@ module.exports = {
                 src: false
             },
             layers: [],
+            svg_path: '',
             activeLayerId: '',
             activeLayer: {
                 type: false,
@@ -40,12 +42,6 @@ module.exports = {
     mixins: [stateMixin],
 
     created: function () {
-        this.$http.get('get/' + this.projectID, function (data, status, request) {
-
-            console.log(data);
-        }).error(function (data, status, request) {
-            // handle error
-        });
 
 
     },
@@ -65,14 +61,6 @@ module.exports = {
         this.updateCanvas();
         console.log('loaded.bps.canvas');
         this.$broadcast('loaded.bps.canvas');
-        this.$http.post('save/' + this.projectID, {data: this._toObject(), token: this.bixConfig.token}, function (data, status, request) {
-
-            console.log(data);
-            // set data on vm
-            this.$set('bixConfig.token', data.token);
-        }).error(function (data, status, request) {
-            // handle error
-        });
 
     },
 
@@ -174,7 +162,7 @@ module.exports = {
          */
         _loadFromObject: function (data) {
             var $this = this;
-            ['projectName', 'projectID', 'canvasOptions'].forEach(function (key) {
+            ['extID', 'projectName', 'projectID', 'canvasOptions'].forEach(function (key) {
                 $this.$set(key, data[key]);
             });
             this.layers = [];
@@ -198,6 +186,7 @@ module.exports = {
          */
         _toObject: function () {
             var obj = {
+                extID: this.extID,
                 projectName: this.projectName,
                 projectID: this.projectID,
                 canvasOptions: this.canvasOptions,

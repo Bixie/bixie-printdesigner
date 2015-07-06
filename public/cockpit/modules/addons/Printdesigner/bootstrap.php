@@ -19,7 +19,7 @@
 
 $this->module("printdesigner")->extend([
 
-	'tablename' => 'printdesigner_designs',
+	'tablename' => 'printdesigner_projects',
 
 	'settingsIndex' => function () use ($app) {
 		$config = $this->getConfig();

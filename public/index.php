@@ -1,6 +1,9 @@
 <?php
-include 'cockpit/bootstrap.php';
-?>
+$token = '';
+if (file_exists('cockpit/bootstrap.php')) {
+	include 'cockpit/bootstrap.php';
+	$token = getSessionToken();
+}?>
 <!DOCTYPE HTML>
 <html lang="nl-NL" dir="ltr">
 
@@ -11,6 +14,7 @@ include 'cockpit/bootstrap.php';
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="vendor/uikit/css/uikit.almost-flat.min.css" type="text/css" />
     <link rel="stylesheet" href="vendor/uikit/css/components/sortable.almost-flat.min.css" type="text/css" />
+    <link rel="stylesheet" href="vendor/uikit/css/components/notify.almost-flat.min.css" type="text/css" />
 </head>
 
 <body>
@@ -27,7 +31,7 @@ include 'cockpit/bootstrap.php';
     </div>
     <script>
         var $bixConfig = {
-            token: '<?= getSessionToken(); ?>',
+            token: '<?= $token ?>',
 			url: 'cockpit/index.php/api/printdesigner',
 			prefix: 'bpd',
 			saveStateDebounceTime: 1000,
@@ -43,5 +47,6 @@ include 'cockpit/bootstrap.php';
 
     <script type="text/javascript" src="vendor/uikit/js/components/sortable.js"></script>
     <script type="text/javascript" src="vendor/uikit/js/components/lightbox.js"></script>
+    <script type="text/javascript" src="vendor/uikit/js/components/notify.js"></script>
 </body>
 </html>

@@ -26638,6 +26638,7 @@
 
 	    data: function () {
 	        return {
+	            extID: 0, //external id
 	            projectName: this.$trans('Project 1'),
 	            projectID: _util.randomId(),
 	            bixConfig: window.$bixConfig,
@@ -26646,6 +26647,7 @@
 	                src: false
 	            },
 	            layers: [],
+	            svg_path: '',
 	            activeLayerId: '',
 	            activeLayer: {
 	                type: false,
@@ -26670,12 +26672,6 @@
 	    mixins: [stateMixin],
 
 	    created: function () {
-	        this.$http.get('get/' + this.projectID, function (data, status, request) {
-
-	            console.log(data);
-	        }).error(function (data, status, request) {
-	            // handle error
-	        });
 
 
 	    },
@@ -26695,14 +26691,6 @@
 	        this.updateCanvas();
 	        console.log('loaded.bps.canvas');
 	        this.$broadcast('loaded.bps.canvas');
-	        this.$http.post('save/' + this.projectID, {data: this._toObject(), token: this.bixConfig.token}, function (data, status, request) {
-
-	            console.log(data);
-	            // set data on vm
-	            this.$set('bixConfig.token', data.token);
-	        }).error(function (data, status, request) {
-	            // handle error
-	        });
 
 	    },
 
@@ -26804,7 +26792,7 @@
 	         */
 	        _loadFromObject: function (data) {
 	            var $this = this;
-	            ['projectName', 'projectID', 'canvasOptions'].forEach(function (key) {
+	            ['extID', 'projectName', 'projectID', 'canvasOptions'].forEach(function (key) {
 	                $this.$set(key, data[key]);
 	            });
 	            this.layers = [];
@@ -26828,6 +26816,7 @@
 	         */
 	        _toObject: function () {
 	            var obj = {
+	                extID: this.extID,
 	                projectName: this.projectName,
 	                projectID: this.projectID,
 	                canvasOptions: this.canvasOptions,
@@ -27246,7 +27235,7 @@
 /* 34 */
 /***/ function(module, exports) {
 
-	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <a href=\"\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\" download=\"{{ projectName | snake}}\">\n        <i class=\"uk-icon-download uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</a>";
+	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <button type=\"button\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\">\n        <i class=\"uk-icon-arrow-right uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</button>\n\n    <a class=\"uk-button uk-button-success\" href=\"\" target=\"_blank\" v-show=\"svg_path\" v-attr=\"href: svg_path\" v-el=\"downloadExport\">\n        <i class=\"uk-icon-file-code-o uk-margin-small-right\"></i>{{ 'SVG bestand' | trans }}</a>";
 	module.exports = {
 
 	    props: [],
@@ -27286,17 +27275,68 @@
 
 	    methods: {
 	        exportImage: function () {
+
 	            this.canvas.discardActiveGroup();
 	            this.canvas.discardActiveObject();
+
 	            return this.canvas.toDataURL();
+
 	        },
 	        exportDesign: function (e) {
+
 	            this.canvas.discardActiveGroup();
 	            this.canvas.discardActiveObject();
-	            e.target.href = this.canvas.toDataURL();
-	            console.log(this.canvas.toSVG());
+
+	            this.$set('svg_path', '');
+
+	            this.$http.post('export', {
+	                    project: this._toObject(),
+	                    svg: this.canvas.toSVG(),
+	                    token: this.bixConfig.token
+	                }, function (ret, status, request) {
+
+	                    if (ret.error) {
+	                        UIkit.notify(this.$trans(ret.error), {status: 'danger'});
+	                    } else {
+
+	                                    console.log(ret);
+	                                    console.log(this.$$.downloadExport);
+	//                        $button.attr('href', ret.data.svg_path);
+	//                        // set data on vm
+	                        this.$set('bixConfig.token', ret.data.token);
+	                        this.$set('svg_path', ret.data.svg_path);
+	                        this.$set('extID', ret.data.extID);
+	                    }
+
+	            }.bind(this)).error(function (data, status, request) {
+	                    // handle error
+	                });
+
+	            e.target.href = 'fh';
 
 	        }
+	    },
+
+	    watch: {
+	        /**
+	         * lookup external record
+	         * @param val
+	         */
+	        'projectID': function (val) {
+	            if (val) {
+	                this.$http.get('get/' + val, function (ret, status, request) {
+
+	                    if (ret.data) {
+	                        this.$set('extID', ret.data.extID);
+	                    console.log(ret.data);
+	                    }
+	                }).error(function (ret, status, request) {
+	                    // handle error
+	                });
+	            }
+
+	        }
+
 	    }
 
 	};

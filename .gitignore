@@ -8,6 +8,8 @@
 /vendor
 /html
 /public/images
+/public/projects/*
+!/public/projects/.gitkeep
 /public/cockpit/*
 !/public/cockpit/modules
 /public/cockpit/modules/*
