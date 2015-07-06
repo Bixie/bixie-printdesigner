@@ -26629,13 +26629,13 @@
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _util = __webpack_require__(14); //todo why is _ available, and _uitl not??
+	var _util = __webpack_require__(14); //todo why is _ available, and _util not??
 	//mixins
-	var stateMixin = __webpack_require__(22); //todo I want this in app.js
+	var stateMixin = __webpack_require__(24); //todo I want this in app.js
 
 	module.exports = {
 
-	    template: __webpack_require__(23),
+	    template: __webpack_require__(25),
 
 	    data: function () {
 	        return {
@@ -26657,14 +26657,15 @@
 	    },
 
 	    components: {
-	        fabric_layercontrols: __webpack_require__(24),
-	        fabric_layerselect: __webpack_require__(26),
-	        fabric_figures: __webpack_require__(28),
-	        fabric_text: __webpack_require__(30),
+	        fabric_layercontrols: __webpack_require__(26),
+	        fabric_layerselect: __webpack_require__(28),
+	        fabric_figures: __webpack_require__(30),
+	        fabric_text: __webpack_require__(22),
 	        fabric_images: __webpack_require__(32),
 	        fabric_export: __webpack_require__(34),
 	        fabric_state: __webpack_require__(35),
-	        fabric_library: __webpack_require__(36)
+	        fabric_canvasoptions: __webpack_require__(36),
+	        fabric_library: __webpack_require__(37)
 	    },
 
 	    mixins: [stateMixin],
@@ -26864,6 +26865,94 @@
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = {
+
+	    template: __webpack_require__(23),
+
+	    inherit: true,
+
+	    data: function () {
+	        return {
+	            defaultText: 'Text',
+	            fonts: [
+	                {
+	                    value: 'Times New Roman',
+	                    text: 'Times New Roman'
+	                },
+	                {
+	                    value: 'Georgia',
+	                    text: 'Georgia'
+	                },
+	                {
+	                    value: 'Arial',
+	                    text: 'Arial'
+	                },
+	                {
+	                    value: 'Lucida Sans Unicode',
+	                    text: 'Lucida Sans'
+	                },
+	                {
+	                    value: 'Courier New',
+	                    text: 'Courier New'
+	                },
+	                {
+	                    value: 'Trebuchet MS',
+	                    text: 'Trebuchet'
+	                },
+	                {
+	                    value: 'Tahoma',
+	                    text: 'Tahoma'
+	                },
+	                {
+	                    value: 'Comic Sans MS',
+	                    text: 'Comic Sans'
+	                }
+	            ]
+	        };
+	    },
+
+	    methods: {
+
+	        addText: function () {
+	            var $this = this, obj = this.$getLayer('text', {
+	                title: this.$trans('text layer'),
+	                onSetFabricObject: function () {
+	                    this.fObj = new fabric.Text($this.defaultText, {
+	                        left: 10,
+	                        top: 10,
+	                        fill: '#000000'
+	                    });
+	                },
+	                onUpdateValue: function (controlType) {
+	                    if (controlType === 'text') {
+	                        this.title = this.fObj.text.substr(0, 15);
+	                    }
+	                }
+	            });
+
+	            this._addLayer(obj);
+	        },
+
+	        setFill: function (controlType, value) {
+	            if (controlType === 'fill') {
+	                this.activeLayer.fObj.setFill(value);
+	                this.updateValue(controlType);
+	            }
+	        }
+
+	    }
+	};
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	module.exports = "\n<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-on=\"click: addText\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ 'Tekst' | trans}}</button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div v-show=\"activeLayer.type\">\n\n            <div class=\"uk-grid\">\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <div class=\"uk-form-controls\">\n                    <textarea id=\"layercontrol-text\"\n                              v-model=\"activeLayer.fObj.text\"\n                              v-on=\"input: updateValue('text')\"></textarea>\n                        </div>\n                    </div>\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fontfamily\">{{ 'Lettertype' | trans}}</label>\n                        <div class=\"uk-form-controls\">\n                            <select id=\"layercontrol-fontfamily\"\n                                    v-model=\"activeLayer.fObj.fontFamily\"\n                                    options=\"fonts\"\n                                    v-on=\"change: updateValue('fontFamily')\"></select>\n                        </div>\n                    </div>\n\n                </div>\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Tekstkleur' | trans}}</label>\n\n                        <div class=\"uk-form-controls\">\n                            <colorpicker type=\"fill\" id=\"layercontrol-fill\"\n                                         model-value=\"{{ activeLayer.fObj.fill }}\"\n                                         update-parent=\"{{ setFill }}\"></colorpicker>\n                        </div>\n                    </div>\n\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _util = __webpack_require__(14); //todo why is _ available, and _uitl not??
 
 	module.exports = {
@@ -26913,30 +27002,10 @@
 
 
 /***/ },
-/* 23 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"uk-panel uk-panel-box uk-panel-box\">\n    <div class=\"uk-grid uk-grid-small\">\n        <div class=\"uk-width-1-4\">\nsettings canvas\n        </div>\n        <div class=\"uk-width-1-2\">\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"design-name\">{{ 'Naam design' | trans}}</label>\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"design-name\" class=\"uk-form-large uk-form-blank uk-width-1-1\"\n                           v-model=\"projectName\"\n                           v-on=\"change: saveState\"/>\n                </div>\n            </div>\n\n        </div>\n        <div class=\"uk-width-1-4\">\n\n            <div class=\"uk-margin\">\n                <fabric_state></fabric_state>\n            </div>\n            <div class=\"uk-margin\">\n                <fabric_export></fabric_export>\n            </div>\n\n        </div>\n\n\n    </div>\n</div>\n<div class=\"uk-margin\">\n    <div class=\"uk-width-1-1\">\n\n        <ul class=\"uk-tab\" data-uk-tab=\"{connect:'#tools-switcher'}\">\n            <li><a href=\"#\"><i class=\"uk-icon-pencil\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-font\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-image\"></i></a></li>\n        </ul>\n\n        <ul id=\"tools-switcher\" class=\"uk-switcher uk-margin\">\n            <li>\n                <fabric_figures></fabric_figures>\n            </li>\n            <li>\n                <fabric_text></fabric_text>\n            </li>\n            <li>\n                <fabric_images></fabric_images>\n            </li>\n        </ul>\n\n\n    </div>\n</div>\n\n\n<div class=\"uk-grid uk-grid-small\">\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n\n            <fabric_layercontrols></fabric_layercontrols>\n\n        </div>\n\n    </div>\n\n    <div class=\"uk-width-medium-2-4 uk-width-large-3-5\">\n\n        <div class=\"uk-panel uk-panel-box\">\n\n            <canvas v-el=\"canvas\" width=\"{{ canvasOptions.width }}\" height=\"{{ canvasOptions.height }}\"></canvas>\n\n        </div>\n\n    </div>\n\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n            <fabric_layerselect></fabric_layerselect>\n        </div>\n\n    </div>\n</div>\n\n<div class=\"uk-margin\">\n\n    <fabric_library></fabric_library>\n\n</div>\n\n<pre>{{ $data.activeLayer.fObj | json }}</pre>\n<pre>{{ $data | json }}</pre>";
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {
-
-	    template: __webpack_require__(25),
-
-	    inherit: true
-
-	    //todo fix scale/transp etc controls!
-
-	};
-
-/***/ },
 /* 25 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"uk-panel uk-panel-box\"\n     v-show=\"activeLayer.type\"\n        >\n    <h3 class=\"uk-panel-title\">{{ activeLayer.title}}</h3>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-width\">{{ 'Breedte' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-width\"\n                   v-model=\"activeLayer.fObj.width\"\n                   v-on=\"input: updateValue('width')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-height\">{{ 'Hoogte' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-height\"\n                   v-model=\"activeLayer.fObj.height\"\n                   v-on=\"input: updateValue('height')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-opacity\">{{ 'Doorlaatbaarheid' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-opacity\" min=\"0\" max=\"1\" step=\"0.01\"\n                   v-model=\"activeLayer.fObj.opacity\"\n                   v-on=\"input: updateValue('opacity')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-top\">{{ 'Top' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-top\" min=\"0\" max=\"{{ canvasOptions.height }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.top\"\n                   v-on=\"input: updateValue('top')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-left\">{{ 'Links' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-left\" min=\"0\" max=\"{{ canvasOptions.width }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.left\"\n                   v-on=\"input: updateValue('left')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scalex\">{{ 'Schaal X-as' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scalex\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleX\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scaley\">{{ 'Schaal Y-as' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scaley\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleY\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'rect'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-angle\">{{ 'Draaihoek' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-angle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.angle\"\n                   v-on=\"input: updateValue('angle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-endangle\">{{ 'Draaihoek' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-endangle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.endAngle\"\n                   v-on=\"input: updateValue('endAngle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-radius\">{{ 'Straal' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-radius\" min=\"0\" max=\"500\" step=\"1\"\n                   v-model=\"activeLayer.fObj.radius\"\n                   v-on=\"input: updateValue('radius')\"\n                   number>\n        </div>\n    </div>\n\n</div>\n\n\n";
+	module.exports = "<div class=\"uk-panel uk-panel-box uk-panel-box\">\n    <div class=\"uk-grid uk-grid-small\">\n        <div class=\"uk-width-1-4\">\n            <fabric_canvasoptions></fabric_canvasoptions>\n        </div>\n        <div class=\"uk-width-1-2\">\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"design-name\">{{ 'Naam design' | trans}}</label>\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"design-name\" class=\"uk-form-large uk-form-blank uk-width-1-1\"\n                           v-model=\"projectName\"\n                           v-on=\"change: saveState\"/>\n                </div>\n            </div>\n\n        </div>\n        <div class=\"uk-width-1-4\">\n\n            <div class=\"uk-margin\">\n                <fabric_state></fabric_state>\n            </div>\n            <div class=\"uk-margin\">\n                <fabric_export></fabric_export>\n            </div>\n\n        </div>\n\n\n    </div>\n</div>\n<div class=\"uk-margin\">\n    <div class=\"uk-width-1-1\">\n\n        <ul class=\"uk-tab\" data-uk-tab=\"{connect:'#tools-switcher'}\">\n            <li><a href=\"#\"><i class=\"uk-icon-pencil\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-font\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-image\"></i></a></li>\n        </ul>\n\n        <ul id=\"tools-switcher\" class=\"uk-switcher uk-margin\">\n            <li>\n                <fabric_figures></fabric_figures>\n            </li>\n            <li>\n                <fabric_text></fabric_text>\n            </li>\n            <li>\n                <fabric_images></fabric_images>\n            </li>\n        </ul>\n\n\n    </div>\n</div>\n\n\n<div class=\"uk-grid uk-grid-small\">\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n\n            <fabric_layercontrols></fabric_layercontrols>\n\n        </div>\n\n    </div>\n\n    <div class=\"uk-width-medium-2-4 uk-width-large-3-5\">\n\n        <div class=\"uk-panel uk-panel-box\">\n\n            <canvas v-el=\"canvas\" width=\"{{ canvasOptions.width }}\" height=\"{{ canvasOptions.height }}\"></canvas>\n\n        </div>\n\n    </div>\n\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n            <fabric_layerselect></fabric_layerselect>\n        </div>\n\n    </div>\n</div>\n\n<div class=\"uk-margin\">\n\n    <fabric_library></fabric_library>\n\n</div>\n\n<pre>{{ $data.activeLayer.fObj | json }}</pre>\n<pre>{{ $data | json }}</pre>";
 
 /***/ },
 /* 26 */
@@ -26945,6 +27014,26 @@
 	module.exports = {
 
 	    template: __webpack_require__(27),
+
+	    inherit: true
+
+	    //todo fix scale/transp etc controls!
+
+	};
+
+/***/ },
+/* 27 */
+/***/ function(module, exports) {
+
+	module.exports = "\n<div class=\"uk-panel uk-panel-box\"\n     v-show=\"activeLayer.type\"\n        >\n    <h3 class=\"uk-panel-title\">{{ activeLayer.title}}</h3>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-width\">{{ 'Breedte' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-width\"\n                   v-model=\"activeLayer.fObj.width\"\n                   v-on=\"input: updateValue('width')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-height\">{{ 'Hoogte' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"text\" id=\"layercontrol-height\"\n                   v-model=\"activeLayer.fObj.height\"\n                   v-on=\"input: updateValue('height')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-opacity\">{{ 'Doorlaatbaarheid' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-opacity\" min=\"0\" max=\"1\" step=\"0.01\"\n                   v-model=\"activeLayer.fObj.opacity\"\n                   v-on=\"input: updateValue('opacity')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-top\">{{ 'Top' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-top\" min=\"0\" max=\"{{ canvasOptions.height }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.top\"\n                   v-on=\"input: updateValue('top')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-left\">{{ 'Links' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-left\" min=\"0\" max=\"{{ canvasOptions.width }}\" step=\"1\"\n                   v-model=\"activeLayer.fObj.left\"\n                   v-on=\"input: updateValue('left')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scalex\">{{ 'Schaal X-as' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scalex\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleX\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"layercontrol-scaley\">{{ 'Schaal Y-as' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-scaley\" min=\"0\" max=\"3\" step=\"0.1\"\n                   v-model=\"activeLayer.fObj.scaleY\"\n                   v-on=\"input: updateValue('scale')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'rect'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-angle\">{{ 'Draaihoek' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-angle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.angle\"\n                   v-on=\"input: updateValue('angle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-endangle\">{{ 'Draaihoek' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-endangle\" min=\"0\" max=\"360\" step=\"1\"\n                   v-model=\"activeLayer.fObj.endAngle\"\n                   v-on=\"input: updateValue('endAngle')\"\n                   number>\n        </div>\n    </div>\n\n    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'circle'\">\n        <label class=\"uk-form-label\" for=\"layercontrol-radius\">{{ 'Straal' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"range\" id=\"layercontrol-radius\" min=\"0\" max=\"500\" step=\"1\"\n                   v-model=\"activeLayer.fObj.radius\"\n                   v-on=\"input: updateValue('radius')\"\n                   number>\n        </div>\n    </div>\n\n</div>\n\n\n";
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {
+
+	    template: __webpack_require__(29),
 
 	    inherit: true,
 
@@ -27007,18 +27096,18 @@
 	};
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports) {
 
 	module.exports = "\n<ul class=\"uk-sortable uk-list uk-list-line uk-form\"\n    data-uk-sortable=\"{handleClass:'uk-sortable-handle', threshold: 1}\">\n    <li data-id=\"{{ layer.id }}\"\n        v-repeat=\"layer: layers | orderBy 'ordering' true\">\n        <div v-on=\"click: selectLayer(layer)\" class=\"uk-panel\" v-class=\"uk-panel-box-primary: layer.id == activeLayerId\">\n\n            <div class=\"uk-grid uk-grid-small uk-flex uk-flex-middle\">\n                <div class=\"uk-width-1-6 uk-text-center\">\n                    <button type=\"button\" class=\"uk-button uk-button-mini uk-sortable-handle\"><i\n                            class=\"uk-icon-bars\"></i></button>\n                </div>\n                <div class=\"uk-width-5-6\">\n\n                    <input type=\"text\" class=\"uk-form-blank uk-width-1-1\"\n                           v-model=\"layer.title\"/>\n\n                </div>\n            </div>\n\n            <div class=\"uk-width-1-1 uk-text-right\">\n                {{layer.ordering}}\n                <button type=\"button\" class=\"uk-button uk-button-danger uk-button-mini\"\n                        v-on=\"click: removeLayer(layer)\"\n                        ><i class=\"uk-icon-trash-o\"></i></button>\n            </div>\n\n        </div>\n\n    </li>\n</ul>\n";
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(29),
+	    template: __webpack_require__(31),
 
 	    inherit: true,
 
@@ -27099,98 +27188,10 @@
 	};
 
 /***/ },
-/* 29 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-repeat=\"figure: figures\" v-on=\"click: addFigure(figure)\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ figure.label }}\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Kleur' | trans}}</label>\n\n                <div class=\"uk-form-controls\">\n                    <colorpicker type=\"fill\" id=\"layercontrol-fill\"\n                                 model-value=\"{{ activeLayer.fObj.fill }}\"\n                                 update-parent=\"{{ setFill }}\"></colorpicker>\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
-
-/***/ },
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {
-
-	    template: __webpack_require__(31),
-
-	    inherit: true,
-
-	    data: function () {
-	        return {
-	            defaultText: 'Text',
-	            fonts: [
-	                {
-	                    value: 'Times New Roman',
-	                    text: 'Times New Roman'
-	                },
-	                {
-	                    value: 'Georgia',
-	                    text: 'Georgia'
-	                },
-	                {
-	                    value: 'Arial',
-	                    text: 'Arial'
-	                },
-	                {
-	                    value: 'Lucida Sans Unicode',
-	                    text: 'Lucida Sans'
-	                },
-	                {
-	                    value: 'Courier New',
-	                    text: 'Courier New'
-	                },
-	                {
-	                    value: 'Trebuchet MS',
-	                    text: 'Trebuchet'
-	                },
-	                {
-	                    value: 'Tahoma',
-	                    text: 'Tahoma'
-	                },
-	                {
-	                    value: 'Comic Sans MS',
-	                    text: 'Comic Sans'
-	                }
-	            ]
-	        };
-	    },
-
-	    methods: {
-
-	        addText: function () {
-	            var $this = this, obj = this.$getLayer('text', {
-	                title: this.$trans('text layer'),
-	                onSetFabricObject: function () {
-	                    this.fObj = new fabric.Text($this.defaultText, {
-	                        left: 10,
-	                        top: 10,
-	                        fill: '#000000'
-	                    });
-	                },
-	                onUpdateValue: function (controlType) {
-	                    if (controlType === 'text') {
-	                        this.title = this.fObj.text.substr(0, 15);
-	                    }
-	                }
-	            });
-
-	            this._addLayer(obj);
-	        },
-
-	        setFill: function (controlType, value) {
-	            if (controlType === 'fill') {
-	                this.activeLayer.fObj.setFill(value);
-	                this.updateValue(controlType);
-	            }
-	        }
-
-	    }
-	};
-
-/***/ },
 /* 31 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-on=\"click: addText\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ 'Tekst' | trans}}</button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div v-show=\"activeLayer.type\">\n\n            <div class=\"uk-grid\">\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <div class=\"uk-form-controls\">\n                    <textarea id=\"layercontrol-text\"\n                              v-model=\"activeLayer.fObj.text\"\n                              v-on=\"input: updateValue('text')\"></textarea>\n                        </div>\n                    </div>\n\n                    <div class=\"uk-form-row\" v-if=\"activeLayer.type == 'text'\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fontfamily\">{{ 'Lettertype' | trans}}</label>\n                        <div class=\"uk-form-controls\">\n                            <select id=\"layercontrol-fontfamily\"\n                                    v-model=\"activeLayer.fObj.fontFamily\"\n                                    options=\"fonts\"\n                                    v-on=\"change: updateValue('fontFamily')\"></select>\n                        </div>\n                    </div>\n\n                </div>\n                <div class=\"uk-width-medium-1-2\">\n\n                    <div class=\"uk-form-row\">\n                        <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Tekstkleur' | trans}}</label>\n\n                        <div class=\"uk-form-controls\">\n                            <colorpicker type=\"fill\" id=\"layercontrol-fill\"\n                                         model-value=\"{{ activeLayer.fObj.fill }}\"\n                                         update-parent=\"{{ setFill }}\"></colorpicker>\n                        </div>\n                    </div>\n\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
+	module.exports = "<div class=\"uk-grid uk-grid-small\">\n    <div class=\"uk-width-1-3\">\n\n        <div class=\"uk-button-group\">\n\n            <button type=\"button\" class=\"uk-button\" v-repeat=\"figure: figures\" v-on=\"click: addFigure(figure)\"><i\n                    class=\"uk-icon-plus uk-margin-small-right\"></i>{{ figure.label }}\n            </button>\n\n        </div>\n\n    </div>\n    <div class=\"uk-width-2-3\">\n\n        <div class=\"uk-form-horizontal\"\n             v-show=\"activeLayer.type\">\n\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"layercontrol-fill\">{{ 'Kleur' | trans}}</label>\n\n                <div class=\"uk-form-controls\">\n                    <colorpicker type=\"fill\" id=\"layercontrol-fill\"\n                                 model-value=\"{{ activeLayer.fObj.fill }}\"\n                                 update-parent=\"{{ setFill }}\"></colorpicker>\n                </div>\n            </div>\n\n        </div>\n\n\n    </div>\n\n</div>\n\n\n";
 
 /***/ },
 /* 32 */
@@ -27240,7 +27241,7 @@
 /* 34 */
 /***/ function(module, exports) {
 
-	var __vue_template__ = "<a href=\"\" class=\"uk-button\" v-on=\"click: exportDesign\" download=\"{{ projectName | snake}}\">\n        <i class=\"uk-icon-download uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</a>";
+	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <a href=\"\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\" download=\"{{ projectName | snake}}\">\n        <i class=\"uk-icon-download uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</a>";
 	module.exports = {
 
 	    props: [],
@@ -27248,10 +27249,42 @@
 	    inherit: true,
 
 	    ready: function () {
+	        var $this = this;
+	        UIkit.on('beforeready.uk.dom', function () {
 
+	            UIkit.plugin('lightbox', 'fabricpreview', {
+
+	                init: function (lightbox) {
+
+	                    lightbox.on('showitem.uk.lightbox', function (e, data) {
+
+	                        var resolve = function (source, width, height) {
+
+	                            data.meta = {
+	                                'content': '<img src="' + source + '" alt="" width="' + width + '" height="' + height + '"/>',
+	                                'width': width,
+	                                'height': height
+	                            };
+
+	                            data.promise.resolve();
+	                        };
+
+	                        if (data.type === 'fabricpreview') {
+	                            resolve($this.exportImage(), Math.min($this.canvas.width, 800), Math.min($this.canvas.height, 600));
+	                        }
+	                    });
+
+	                }
+	            });
+	        });
 	    },
 
 	    methods: {
+	        exportImage: function () {
+	            this.canvas.discardActiveGroup();
+	            this.canvas.discardActiveObject();
+	            return this.canvas.toDataURL();
+	        },
 	        exportDesign: function (e) {
 	            this.canvas.discardActiveGroup();
 	            this.canvas.discardActiveObject();
@@ -27321,11 +27354,34 @@
 
 /***/ },
 /* 36 */
+/***/ function(module, exports) {
+
+	var __vue_template__ = "<div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"canvasoptions-height\">{{ 'Hoogte canvas' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"number\" class=\"uk-text-right uk-form-width-small uk-form-blank\" id=\"canvasoptions-height\" v-model=\"canvasOptions.height\" number=\"\">\n        </div>\n    </div>\n    <div class=\"uk-form-row\">\n        <label class=\"uk-form-label\" for=\"canvasoptions-width\">{{ 'Breedte canvas' | trans}}</label>\n        <div class=\"uk-form-controls\">\n            <input type=\"number\" class=\"uk-text-right uk-form-width-small uk-form-blank\" id=\"canvasoptions-width\" v-model=\"canvasOptions.width\" number=\"\">\n        </div>\n    </div>";
+	module.exports = {
+
+	    props: [],
+
+	    inherit: true,
+
+	    ready: function () {
+
+	    },
+
+	    methods: {
+
+	    }
+
+	};
+	;(typeof module.exports === "function"? module.exports.options: module.exports).template = __vue_template__;
+
+
+/***/ },
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
 
-	    template: __webpack_require__(37),
+	    template: __webpack_require__(38),
 
 	    inherit: true,
 
@@ -27359,7 +27415,7 @@
 	};
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports) {
 
 	module.exports = "\n<ul class=\"uk-tab\" data-uk-tab=\"{connect:'#library-switcher'}\">\n    <li v-if=\"images.length\"><a href=\"\">{{ 'Afbeeldingen' | trans }}</a></li>\n</ul>\n<ul id=\"library-switcher\" class=\"uk-switcher uk-margin\">\n    <li v-if=\"images.length\">\n        <ul class=\"uk-thumbnav\">\n            <li v-repeat=\"image: images\">\n                <a href=\"#\" title=\"{{ image.title }}\" v-on=\"click: selectImage(image, $event)\">\n                    <img v-attr=\"src: image.src\" alt=\"{{ image.filename }}\" width=\"100\" height=\"150\"/>\n                </a>\n            </li>\n        </ul>\n\n    </li>\n</ul>\n\n";

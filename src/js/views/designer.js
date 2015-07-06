@@ -1,4 +1,4 @@
-var _util = require('../lib/util'); //todo why is _ available, and _uitl not??
+var _util = require('../lib/util'); //todo why is _ available, and _util not??
 //mixins
 var stateMixin = require('../mixins/state.mixin'); //todo I want this in app.js
 
@@ -33,6 +33,7 @@ module.exports = {
         fabric_images: require('../components/Fabric_images'),
         fabric_export: require('../components/Fabric_export.vue'),
         fabric_state: require('../components/Fabric_state.vue'),
+        fabric_canvasoptions: require('../components/Fabric_canvasoptions.vue'),
         fabric_library: require('../components/Fabric_library')
     },
 
