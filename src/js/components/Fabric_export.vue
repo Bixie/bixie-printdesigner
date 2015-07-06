@@ -111,7 +111,7 @@
                 }.bind(this)).error(function (data, status, request) {
                     this.spinning = false;
                     // handle error?
-                });
+                }.bind(this));
 
                 e.target.href = 'fh';
 
