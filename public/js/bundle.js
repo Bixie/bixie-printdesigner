@@ -27308,7 +27308,7 @@
 
 	                        console.log(ret);
 	                        // set data on vm
-	                        this.$set('bixConfig.token', ret.data.token);
+	                        this.$set('bixConfig.token', ret.token);
 	                        this.$set('pdf_path', ret.data.pdf_path);
 	                        this.$set('svg_path', ret.data.svg_path);
 	                        this.$set('extID', ret.data.extID);
@@ -27318,7 +27318,7 @@
 	                }.bind(this)).error(function (data, status, request) {
 	                    this.spinning = false;
 	                    // handle error?
-	                });
+	                }.bind(this));
 
 	                e.target.href = 'fh';
 
