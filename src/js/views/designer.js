@@ -40,12 +40,9 @@ module.exports = {
     mixins: [stateMixin],
 
     created: function () {
-        this.$http.get('testdata.json', function (data, status, request) {
+        this.$http.get('get/' + this.projectID, function (data, status, request) {
 
             console.log(data);
-            // set data on vm
-            //this.$set('someData', data);
-
         }).error(function (data, status, request) {
             // handle error
         });
@@ -68,6 +65,15 @@ module.exports = {
         this.updateCanvas();
         console.log('loaded.bps.canvas');
         this.$broadcast('loaded.bps.canvas');
+        this.$http.post('save/' + this.projectID, {data: this._toObject(), token: this.bixConfig.token}, function (data, status, request) {
+
+            console.log(data);
+            // set data on vm
+            this.$set('bixConfig.token', data.token);
+        }).error(function (data, status, request) {
+            // handle error
+        });
+
     },
 
     filters: {

@@ -1,3 +1,6 @@
+<?php
+include 'cockpit/bootstrap.php';
+?>
 <!DOCTYPE HTML>
 <html lang="nl-NL" dir="ltr">
 
@@ -24,7 +27,10 @@
     </div>
     <script>
         var $bixConfig = {
-            csrf: 'dfsfsfgd', url: '', prefix: 'bpd', saveStateDebounceTime: 1000,
+            token: '<?= getSessionToken(); ?>',
+			url: 'cockpit/index.php/api/printdesigner',
+			prefix: 'bpd',
+			saveStateDebounceTime: 1000,
             canvasOptions: {
                 bgColor: '#ffffff',
                 width: 600,

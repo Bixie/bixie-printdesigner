@@ -18,7 +18,9 @@ $app->on('admin.init', function() use($app) {
 		$printdesigner->site_key = $config['site_key'];
 		$printdesigner->secret_key = $config['secret_key'];
 
-		$app->bindClass("Printdesigner\\Controller\\Printdesigner", "printdesigner");
+		// bind controllers
+		$app->bindClass('Printdesigner\\Controller\\Printdesigner', 'printdesigner');
+		$this->bindClass('Printdesigner\\Controller\\Api', 'api/printdesigner');
 
 	}
 

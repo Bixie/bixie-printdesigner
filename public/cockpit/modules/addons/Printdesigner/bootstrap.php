@@ -40,6 +40,26 @@ $this->module("printdesigner")->extend([
 		}
 		$settings['key'] = 'recaptchaKeys';
 		return $app->module("datastore")->save_entry($this->tablename, $settings);
+	},
+
+	'sessionToken' => '',
+
+	'getSessionToken' => function () use ($app) {
+		$sessionToken = $this("session")->read('printdesigner.sessiontoken', '');
+		if (empty($sessionToken)) {
+			$sessionToken = $app->hash('sessiontoken' . time());
+			$this("session")->write('printdesigner.sessiontoken', $sessionToken);
+		}
+		return $sessionToken;
+	},
+
+	'checkToken' => function () use ($app) {
+		$sessionToken = $this("session")->read('printdesigner.sessiontoken', '');
+		if ($sessionToken !== $app->param('token', null)) {
+			return false;
+		}
+		$this("session")->write('printdesigner.sessiontoken', '');
+		return true;
 	}
 ]);
 
@@ -63,6 +83,14 @@ $this->module("datastore")->extend([
 		return $datastore;
 	}
 ]);
+
+
+if (!function_exists('getSessionToken')) {
+
+	function getSessionToken() {
+		return cockpit("printdesigner")->getSessionToken();
+	}
+}
 
 
 // ADMIN

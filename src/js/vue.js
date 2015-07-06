@@ -2,7 +2,7 @@ module.exports = function install(Vue) {
 
     console.log(window.$bixConfig.canvasOptions);
     window.$bixConfig = _.defaultsDeep(window.$bixConfig, {
-        csrf: '',
+        token: '',
         url: '',
         prefix: 'bpd',
         saveStateDebounceTime: 1000,
@@ -46,6 +46,5 @@ console.log(window.$bixConfig.canvasOptions);
 
     Vue.url.options.root = window.$bixConfig.url;
     Vue.http.options.emulateHTTP = true;
-    Vue.http.options.headers = {'X-XSRF-TOKEN': window.$bixConfig.csrf};
 
 };

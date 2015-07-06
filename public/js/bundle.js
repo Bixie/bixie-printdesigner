@@ -25484,7 +25484,7 @@
 
 	    console.log(window.$bixConfig.canvasOptions);
 	    window.$bixConfig = _.defaultsDeep(window.$bixConfig, {
-	        csrf: '',
+	        token: '',
 	        url: '',
 	        prefix: 'bpd',
 	        saveStateDebounceTime: 1000,
@@ -25528,7 +25528,6 @@
 
 	    Vue.url.options.root = window.$bixConfig.url;
 	    Vue.http.options.emulateHTTP = true;
-	    Vue.http.options.headers = {'X-XSRF-TOKEN': window.$bixConfig.csrf};
 
 	};
 
@@ -26671,12 +26670,9 @@
 	    mixins: [stateMixin],
 
 	    created: function () {
-	        this.$http.get('testdata.json', function (data, status, request) {
+	        this.$http.get('get/' + this.projectID, function (data, status, request) {
 
 	            console.log(data);
-	            // set data on vm
-	            //this.$set('someData', data);
-
 	        }).error(function (data, status, request) {
 	            // handle error
 	        });
@@ -26699,6 +26695,15 @@
 	        this.updateCanvas();
 	        console.log('loaded.bps.canvas');
 	        this.$broadcast('loaded.bps.canvas');
+	        this.$http.post('save/' + this.projectID, {data: this._toObject(), token: this.bixConfig.token}, function (data, status, request) {
+
+	            console.log(data);
+	            // set data on vm
+	            this.$set('bixConfig.token', data.token);
+	        }).error(function (data, status, request) {
+	            // handle error
+	        });
+
 	    },
 
 	    filters: {
