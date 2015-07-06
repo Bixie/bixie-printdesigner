@@ -1,6 +1,12 @@
 module.exports = function install(Vue) {
 
-    var $bixConfig = window.$bixConfig || {csrf: '', url: '', prefix: 'bpd', saveStateDebounceTime: 750};
+    window.$bixConfig = _.extend({
+        csrf: '',
+        url: '',
+        prefix: 'bpd',
+        saveStateDebounceTime: 750
+    }, window.$bixConfig);
+
     /**
      * Libraries/plugins
      */

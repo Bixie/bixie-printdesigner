@@ -10,7 +10,7 @@ module.exports = {
         return {
             projectName: this.$trans('Project 1'),
             projectID: _util.randomId(),
-            bixConfig: window.$bixConfig || {csrf: '', url: '', prefix: 'bpd', saveStateDebounceTime: 750},
+            bixConfig: window.$bixConfig,
             canvasOptions: {
                 bgColor: 'white',
                 width: 520,

@@ -25333,7 +25333,13 @@
 
 	module.exports = function install(Vue) {
 
-	    var $bixConfig = window.$bixConfig || {csrf: '', url: '', prefix: 'bpd', saveStateDebounceTime: 750};
+	    window.$bixConfig = _.extend({
+	        csrf: '',
+	        url: '',
+	        prefix: 'bpd',
+	        saveStateDebounceTime: 750
+	    }, window.$bixConfig);
+
 	    /**
 	     * Libraries/plugins
 	     */
@@ -26439,7 +26445,7 @@
 	        return {
 	            projectName: this.$trans('Project 1'),
 	            projectID: _util.randomId(),
-	            bixConfig: window.$bixConfig || {csrf: '', url: '', prefix: 'bpd', saveStateDebounceTime: 750},
+	            bixConfig: window.$bixConfig,
 	            canvasOptions: {
 	                bgColor: 'white',
 	                width: 520,
