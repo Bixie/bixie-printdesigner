@@ -1,3 +1,5 @@
+var translations = require('../../language/' + (window.$bixConfig.locale || 'nl-NL') + '.js');
+
 module.exports = function (Vue) {
 
     //var formats = ['full', 'long', 'medium', 'short'];
@@ -67,7 +69,7 @@ module.exports = function (Vue) {
 
     Vue.prototype.$trans = function (id, parameters, domain, locale) {
         //todo implement globalize
-        return id;
+        return translations[id] || id;
     };
 
 };

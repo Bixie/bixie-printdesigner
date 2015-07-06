@@ -2,7 +2,7 @@
   "name": "bixie-printdesigner",
   "directory" : "/vendor",
   "dependencies": {
-    "lodash": "~3.9.0",
+    "lodash": "~3.10.0",
     "uikit": "#master",
     "vue": "~0.12.5",
     "vue-validator": "~0.1.1",

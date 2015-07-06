@@ -14,6 +14,7 @@ module.exports = {
 
         addImage: function () {
             var $this = this, obj = this.$getLayer('image', {
+                title: this.$trans('image layer'),
                 onSetFabricObject: function () {
                     var img = document.createElement('img');
                     img.src = $this.activeAsset.url;

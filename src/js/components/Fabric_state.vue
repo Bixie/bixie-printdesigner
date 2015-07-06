@@ -6,6 +6,7 @@
     <button type="button" class="uk-button"
             v-confirm="clearCanvas: confirmClear">
         <i class="uk-icon-times uk-margin-small-right"></i>{{ 'Wis design' | trans}}</button>
+
 </template>
 
 <script>
@@ -31,6 +32,10 @@ module.exports = {
 
         this.$on('loaded.bps.canvas', function () {
             this.initState();
+        }.bind(this));
+
+        this.$on('set.bps.activelayer', function () {
+            this.saveState();
         }.bind(this));
 
         this.$on('clear.bps.activelayer', function () {

@@ -8,7 +8,7 @@ module.exports = {
         return {
             figures: [
                 {
-                    type: 'rectangle',
+                    type: 'rect',
                     label: this.$trans('Rechthoek')
                 },
                 {
@@ -41,9 +41,10 @@ module.exports = {
         getLayerObject: function (figure) {
 
             return this.$getLayer(figure.type, {
+                title: this.$trans(figure.type + ' layer'),
                 onSetFabricObject: function () {
                     switch (this.type) {
-                    case 'rectangle':
+                    case 'rect':
                         this.fObj = new fabric.Rect({
                             top: 110,
                             left: 100,

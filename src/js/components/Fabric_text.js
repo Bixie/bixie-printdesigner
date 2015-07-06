@@ -48,6 +48,7 @@ module.exports = {
 
         addText: function () {
             var $this = this, obj = this.$getLayer('text', {
+                title: this.$trans('text layer'),
                 onSetFabricObject: function () {
                     this.fObj = new fabric.Text($this.defaultText, {
                         left: 10,

@@ -20,6 +20,7 @@ exports.install = function (Vue) {
                     fill: '#ff0000'
                 });
             }
+            this.fObj.layerId = this.id;
         },
         updateValue: function (controlType) {
 

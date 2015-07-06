@@ -30,7 +30,7 @@ module.exports = {
                 this.$localstorage(this.bixConfig.prefix + '.' + this.projectID, JSON.stringify(this._toObject()));
                 this.$broadcast('saved.bps.state');
 
-            }.bind(this), this.bixConfig.saveStateDebounceTime || 1500);
+            }.bind(this), this.bixConfig.saveStateDebounceTime || 1000);
 
         },
 

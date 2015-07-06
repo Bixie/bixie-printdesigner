@@ -11,11 +11,7 @@ module.exports = {
             projectName: this.$trans('Project 1'),
             projectID: _util.randomId(),
             bixConfig: window.$bixConfig,
-            canvasOptions: {
-                bgColor: 'white',
-                width: 520,
-                height: 300
-            },
+            canvasOptions: window.$bixConfig.canvasOptions,
             activeAsset: {
                 src: false
             },
@@ -156,28 +152,12 @@ module.exports = {
          */
         _addLayer: function (layer) {
             layer.ordering = this.layers.length + 1;
-            this.layers.push(layer);
             this.canvas.add(layer.fObj);
+            console.log(layer.fObj);
+            //layer.fObj = this.canvas.item(this.canvas.size() - 1); //get new reference
+            console.log(layer.fObj.toObject()); //todo why is watcher not complete
+            this.layers.push(layer);
             this.activeLayerId = layer.id;
-        },
-        /**
-         * clone to object for storage
-         * @returns {{projectName: *, projectID: *, canvasOptions: *, layers: Array, canvas: (Object|*)}}
-         * @private
-         * todo get it more generic
-         */
-        _toObject: function () {
-            var obj = {
-                projectName: this.projectName,
-                projectID: this.projectID,
-                canvasOptions: this.canvasOptions,
-                layers: [],
-                canvas: this.canvas.toDatalessJSON()
-            };
-            this.layers.forEach(function (layer) {
-                obj.layers.push(layer._toObject());
-            });
-            return obj;
         },
         /**
          * load object from storage
@@ -193,14 +173,34 @@ module.exports = {
             this.layers = [];
             if (this.canvas) {
                 this.canvas.loadFromDatalessJSON(data.canvas, function () {
-                    data.layers.forEach(function (layerData, idx) {
-                        var layer = $this.$getLayer(layerData.type, layerData);
-                        layer.fObj = $this.canvas._objects[idx]; //todo proper match to layer in canvas
+                    $this.canvas.getObjects().forEach(function (canvasObj) {
+                        var layerData = data.layers[canvasObj.layerId], layer = $this.$getLayer(layerData.type, layerData);
+                        console.log(canvasObj); //todo why is watcher complete here?
+                        layer.fObj = canvasObj;
                         $this.layers.push(layer);
                     });
                 });
             }
 
+        },
+        /**
+         * clone to object for storage
+         * @returns {{projectName: *, projectID: *, canvasOptions: *, layers: Array, canvas: (Object|*)}}
+         * @private
+         * todo get it more generic
+         */
+        _toObject: function () {
+            var obj = {
+                projectName: this.projectName,
+                projectID: this.projectID,
+                canvasOptions: this.canvasOptions,
+                layers: {},
+                canvas: this.canvas.toDatalessJSON(['layerId'])
+            };
+            this.layers.forEach(function (layer) {
+                obj.layers[layer.id] = layer._toObject();
+            });
+            return obj;
         }
 
     },

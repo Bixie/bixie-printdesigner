@@ -1,12 +1,19 @@
 module.exports = function install(Vue) {
 
-    window.$bixConfig = _.extend({
+    console.log(window.$bixConfig.canvasOptions);
+    window.$bixConfig = _.defaultsDeep(window.$bixConfig, {
         csrf: '',
         url: '',
         prefix: 'bpd',
-        saveStateDebounceTime: 750
-    }, window.$bixConfig);
-
+        saveStateDebounceTime: 1000,
+        locale: 'nl-NL',
+        canvasOptions: {
+            bgColor: '#ffffff',
+            width: 420,
+            height: 280
+        }
+    });
+console.log(window.$bixConfig.canvasOptions);
     /**
      * Libraries/plugins
      */
@@ -37,8 +44,8 @@ module.exports = function install(Vue) {
      * Resource
      */
 
-    Vue.url.options.root = $bixConfig.url;
+    Vue.url.options.root = window.$bixConfig.url;
     Vue.http.options.emulateHTTP = true;
-    Vue.http.options.headers = {'X-XSRF-TOKEN': $bixConfig.csrf};
+    Vue.http.options.headers = {'X-XSRF-TOKEN': window.$bixConfig.csrf};
 
 };
