@@ -18,6 +18,7 @@ module.exports = {
             },
             layers: [],
             svg_path: '',
+            pdf_path: '',
             activeLayerId: '',
             activeLayer: {
                 type: false,

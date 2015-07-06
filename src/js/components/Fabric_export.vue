@@ -5,12 +5,24 @@
     <button type="button" class="uk-button uk-button-primary" v-on="click: exportDesign">
         <i class="uk-icon-arrow-right uk-margin-small-right"></i>{{ 'Exporteer' | trans }}</button>
 
-    <a class="uk-button uk-button-success" href="" target="_blank"
-       v-show="svg_path"
-       v-attr="href: svg_path"
-       v-el="downloadExport"
-       >
-        <i class="uk-icon-file-code-o uk-margin-small-right"></i>{{ 'SVG bestand' | trans }}</a>
+    <div class="uk-margin">
+        <div class="uk-button-group">
+
+            <a class="uk-button uk-button-small" href="" target="_blank"
+               v-show="pdf_path"
+               v-attr="href: pdf_path"
+                    >
+                <i class="uk-icon-file-pdf-o uk-margin-small-right"></i>{{ 'PDF' | trans }}</a>
+
+            <a class="uk-button uk-button-small" href="" target="_blank"
+               v-show="svg_path"
+               v-attr="href: svg_path"
+                    >
+                <i class="uk-icon-file-code-o uk-margin-small-right"></i>{{ 'SVG' | trans }}</a>
+        </div>
+    </div>
+
+
 </template>
 
 <script>
@@ -66,6 +78,7 @@ module.exports = {
             this.canvas.discardActiveGroup();
             this.canvas.discardActiveObject();
 
+            this.$set('pdf_path', '');
             this.$set('svg_path', '');
 
             this.$http.post('export', {
@@ -79,10 +92,9 @@ module.exports = {
                     } else {
 
                                     console.log(ret);
-                                    console.log(this.$$.downloadExport);
-//                        $button.attr('href', ret.data.svg_path);
-//                        // set data on vm
+                        // set data on vm
                         this.$set('bixConfig.token', ret.data.token);
+                        this.$set('pdf_path', ret.data.pdf_path);
                         this.$set('svg_path', ret.data.svg_path);
                         this.$set('extID', ret.data.extID);
                     }

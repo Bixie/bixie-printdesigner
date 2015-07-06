@@ -59,6 +59,8 @@ class Api extends \Cockpit\Controller {
 		}
 		$fileSize = file_put_contents(COCKPIT_DOCS_ROOT . '/' . $project['svg_path'], $svg);
 
+		$project['pdf_path'] = 'projects/' . $project['projectID'] . '/export.pdf';
+		$this->app->helper("pdf")->fromSvg(COCKPIT_DOCS_ROOT . '/' . $project['svg_path'], COCKPIT_DOCS_ROOT . '/' . $project['pdf_path']);
 
 		//vue don't want no dangling _'s
 		$project['_id'] = !empty($project['extID']) ? $project['extID'] : null;

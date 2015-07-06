@@ -26648,6 +26648,7 @@
 	            },
 	            layers: [],
 	            svg_path: '',
+	            pdf_path: '',
 	            activeLayerId: '',
 	            activeLayer: {
 	                type: false,
@@ -27235,7 +27236,7 @@
 /* 34 */
 /***/ function(module, exports) {
 
-	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <button type=\"button\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\">\n        <i class=\"uk-icon-arrow-right uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</button>\n\n    <a class=\"uk-button uk-button-success\" href=\"\" target=\"_blank\" v-show=\"svg_path\" v-attr=\"href: svg_path\" v-el=\"downloadExport\">\n        <i class=\"uk-icon-file-code-o uk-margin-small-right\"></i>{{ 'SVG bestand' | trans }}</a>";
+	var __vue_template__ = "<a href=\"\" class=\"uk-button\" data-uk-lightbox=\"\" data-lightbox-type=\"fabricpreview\">\n        <i class=\"uk-icon-eye uk-margin-small-right\"></i>{{ 'Preview' | trans }}</a>\n\n    <button type=\"button\" class=\"uk-button uk-button-primary\" v-on=\"click: exportDesign\">\n        <i class=\"uk-icon-arrow-right uk-margin-small-right\"></i>{{ 'Exporteer' | trans }}</button>\n\n    <div class=\"uk-margin\">\n        <div class=\"uk-button-group\">\n            <a class=\"uk-button uk-button-small\" href=\"\" target=\"_blank\" v-show=\"svg_path\" v-attr=\"href: svg_path\">\n                <i class=\"uk-icon-file-code-o uk-margin-small-right\"></i>{{ 'SVG' | trans }}</a>\n\n            <a class=\"uk-button uk-button-small\" href=\"\" target=\"_blank\" v-show=\"pdf_path\" v-attr=\"href: pdf_path\">\n                <i class=\"uk-icon-file-pdf-o uk-margin-small-right\"></i>{{ 'PDF' | trans }}</a>\n        </div>\n    </div>";
 	module.exports = {
 
 	    props: [],
@@ -27300,10 +27301,9 @@
 	                    } else {
 
 	                                    console.log(ret);
-	                                    console.log(this.$$.downloadExport);
-	//                        $button.attr('href', ret.data.svg_path);
-	//                        // set data on vm
+	                        // set data on vm
 	                        this.$set('bixConfig.token', ret.data.token);
+	                        this.$set('pdf_path', ret.data.pdf_path);
 	                        this.$set('svg_path', ret.data.svg_path);
 	                        this.$set('extID', ret.data.extID);
 	                    }

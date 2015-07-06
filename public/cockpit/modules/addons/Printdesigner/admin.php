@@ -6,6 +6,7 @@
 // ACL
 $this("acl")->addResource('Printdesigner', ['manage.printdesigner']);
 
+$app->helpers["pdf"]    = 'Printdesigner\\Helper\\Pdf';
 
 $app->on('admin.init', function() use($app) {
 
