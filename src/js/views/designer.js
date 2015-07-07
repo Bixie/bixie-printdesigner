@@ -8,23 +8,26 @@ module.exports = {
 
     data: function () {
         return {
-            extID: 0, //external id
+            bixConfig: window.$bixConfig,
+            /** project properties*/
+            extID: null, //external id
             projectName: this.$trans('Project 1'),
             projectID: _util.randomId(),
-            bixConfig: window.$bixConfig,
-            canvasOptions: window.$bixConfig.canvasOptions,
-            activeAsset: {
-                src: false
-            },
-            layers: [],
             svg_path: '',
             pdf_path: '',
+            /** canvas*/
+            canvasOptions: window.$bixConfig.canvasOptions,
+            layers: [],
             activeLayerId: '',
             activeLayer: {
                 type: false,
                 fObj: {}
             },
-            canvas: null
+            canvas: null,
+            /** component vars*/
+            activeAsset: {
+                src: false
+            }
         };
     },
 
@@ -107,12 +110,30 @@ module.exports = {
             this.activeLayerId = '';
         },
         /**
+         * clear complete project
+         */
+        clearProject: function () {
+            this.extID = null;
+            this.projectName = this.$trans('Project 1');
+            this.projectID = _util.randomId();
+            this.svg_path = '';
+            this.pdf_path = '';
+            this.clearCanvas();
+        },
+        /**
          * clear complete canvas
          */
         clearCanvas: function () {
             this.clearActiveLayer();
             this.layers = [];
             this.canvas.clear();
+        },
+        /**
+         * deactivate active objects on canvas
+         */
+        deactivateCanvas: function () {
+            this.canvas.discardActiveGroup();
+            this.canvas.discardActiveObject();
         },
         /**
          * triggered from canvas

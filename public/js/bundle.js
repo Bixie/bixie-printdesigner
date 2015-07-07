@@ -26638,23 +26638,26 @@
 
 	    data: function () {
 	        return {
-	            extID: 0, //external id
+	            bixConfig: window.$bixConfig,
+	            /** project properties*/
+	            extID: null, //external id
 	            projectName: this.$trans('Project 1'),
 	            projectID: _util.randomId(),
-	            bixConfig: window.$bixConfig,
-	            canvasOptions: window.$bixConfig.canvasOptions,
-	            activeAsset: {
-	                src: false
-	            },
-	            layers: [],
 	            svg_path: '',
 	            pdf_path: '',
+	            /** canvas*/
+	            canvasOptions: window.$bixConfig.canvasOptions,
+	            layers: [],
 	            activeLayerId: '',
 	            activeLayer: {
 	                type: false,
 	                fObj: {}
 	            },
-	            canvas: null
+	            canvas: null,
+	            /** component vars*/
+	            activeAsset: {
+	                src: false
+	            }
 	        };
 	    },
 
@@ -26735,6 +26738,17 @@
 	         */
 	        clearActiveLayer: function () {
 	            this.activeLayerId = '';
+	        },
+	        /**
+	         * clear complete project
+	         */
+	        clearProject: function () {
+	            this.extID = null;
+	            this.projectName = this.$trans('Project 1');
+	            this.projectID = _util.randomId();
+	            this.svg_path = '';
+	            this.pdf_path = '';
+	            this.clearCanvas();
 	        },
 	        /**
 	         * clear complete canvas
@@ -27000,7 +27014,7 @@
 /* 25 */
 /***/ function(module, exports) {
 
-	module.exports = "<div class=\"uk-panel uk-panel-box uk-panel-box\">\n    <div class=\"uk-grid uk-grid-small\">\n        <div class=\"uk-width-1-4\">\n            <fabric_canvasoptions></fabric_canvasoptions>\n        </div>\n        <div class=\"uk-width-1-2\">\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"design-name\">{{ 'Naam design' | trans}}</label>\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"design-name\" class=\"uk-form-large uk-form-blank uk-width-1-1\"\n                           v-model=\"projectName\"\n                           v-on=\"change: saveState\"/>\n                </div>\n            </div>\n\n        </div>\n        <div class=\"uk-width-1-4\">\n\n            <div class=\"uk-margin\">\n                <fabric_state></fabric_state>\n            </div>\n            <div class=\"uk-margin\">\n                <fabric_export></fabric_export>\n            </div>\n\n        </div>\n\n\n    </div>\n</div>\n<div class=\"uk-margin\">\n    <div class=\"uk-width-1-1\">\n\n        <ul class=\"uk-tab\" data-uk-tab=\"{connect:'#tools-switcher'}\">\n            <li><a href=\"#\"><i class=\"uk-icon-pencil\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-font\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-image\"></i></a></li>\n        </ul>\n\n        <ul id=\"tools-switcher\" class=\"uk-switcher uk-margin\">\n            <li>\n                <fabric_figures></fabric_figures>\n            </li>\n            <li>\n                <fabric_text></fabric_text>\n            </li>\n            <li>\n                <fabric_images></fabric_images>\n            </li>\n        </ul>\n\n\n    </div>\n</div>\n\n\n<div class=\"uk-grid uk-grid-small\">\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n\n            <fabric_layercontrols></fabric_layercontrols>\n\n        </div>\n\n    </div>\n\n    <div class=\"uk-width-medium-2-4 uk-width-large-3-5\">\n\n        <div class=\"uk-panel uk-panel-box\">\n\n            <canvas v-el=\"canvas\" width=\"{{ canvasOptions.width }}\" height=\"{{ canvasOptions.height }}\"></canvas>\n\n        </div>\n\n    </div>\n\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n            <fabric_layerselect></fabric_layerselect>\n        </div>\n\n    </div>\n</div>\n\n<div class=\"uk-margin\">\n\n    <fabric_library></fabric_library>\n\n</div>\n\n<pre>{{ $data.activeLayer.fObj | json }}</pre>\n<pre>{{ $data | json }}</pre>";
+	module.exports = "<div class=\"uk-panel uk-panel-box uk-panel-box\">\n    <div class=\"uk-grid uk-grid-small\">\n        <div class=\"uk-width-1-4\">\n            <fabric_canvasoptions></fabric_canvasoptions>\n        </div>\n        <div class=\"uk-width-1-2\">\n            <div class=\"uk-form-row\">\n                <label class=\"uk-form-label\" for=\"design-name\">{{ 'Projectnaam' | trans}}</label>\n                <div class=\"uk-form-controls\">\n                    <input type=\"text\" id=\"design-name\" class=\"uk-form-large uk-form-blank uk-width-1-1\"\n                           v-model=\"projectName\"\n                           v-on=\"change: saveState\"/>\n                </div>\n            </div>\n\n        </div>\n        <div class=\"uk-width-1-4\">\n\n            <div class=\"uk-margin\">\n                <fabric_state></fabric_state>\n            </div>\n            <div class=\"uk-margin\">\n                <fabric_export></fabric_export>\n            </div>\n\n        </div>\n\n\n    </div>\n</div>\n<div class=\"uk-margin\">\n    <div class=\"uk-width-1-1\">\n\n        <ul class=\"uk-tab\" data-uk-tab=\"{connect:'#tools-switcher'}\">\n            <li><a href=\"#\"><i class=\"uk-icon-pencil\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-font\"></i></a></li>\n            <li><a href=\"#\"><i class=\"uk-icon-image\"></i></a></li>\n        </ul>\n\n        <ul id=\"tools-switcher\" class=\"uk-switcher uk-margin\">\n            <li>\n                <fabric_figures></fabric_figures>\n            </li>\n            <li>\n                <fabric_text></fabric_text>\n            </li>\n            <li>\n                <fabric_images></fabric_images>\n            </li>\n        </ul>\n\n\n    </div>\n</div>\n\n\n<div class=\"uk-grid uk-grid-small\">\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n\n            <fabric_layercontrols></fabric_layercontrols>\n\n        </div>\n\n    </div>\n\n    <div class=\"uk-width-medium-2-4 uk-width-large-3-5\">\n\n        <div class=\"uk-panel uk-panel-box\">\n\n            <canvas v-el=\"canvas\" width=\"{{ canvasOptions.width }}\" height=\"{{ canvasOptions.height }}\"></canvas>\n\n        </div>\n\n    </div>\n\n\n    <div class=\"uk-width-medium-1-4 uk-width-large-1-5\">\n        <div class=\"uk-width-1-1\">\n            <fabric_layerselect></fabric_layerselect>\n        </div>\n\n    </div>\n</div>\n\n<div class=\"uk-margin\">\n\n    <fabric_library></fabric_library>\n\n</div>\n\n<pre>{{ $data.activeLayer.fObj | json }}</pre>\n<pre>{{ $data | json }}</pre>";
 
 /***/ },
 /* 26 */
@@ -27355,7 +27369,7 @@
 /* 35 */
 /***/ function(module, exports) {
 
-	var __vue_template__ = "<div class=\"uk-badge uk-panel-badge {{ badgeClass }}\" v-show=\"badgeMessage\">\n        {{ badgeMessage }}\n    </div>\n\n    <button type=\"button\" class=\"uk-button\" v-confirm=\"clearCanvas: confirmClear\">\n        <i class=\"uk-icon-times uk-margin-small-right\"></i>{{ 'Wis design' | trans}}</button>";
+	var __vue_template__ = "<div class=\"uk-badge uk-panel-badge {{ badgeClass }}\" v-show=\"badgeMessage\">\n        {{ badgeMessage }}\n    </div>\n\n    <button type=\"button\" class=\"uk-button\" v-confirm=\"clearProject: confirmClear\">\n        <i class=\"uk-icon-times uk-margin-small-right\"></i>{{ 'Wis project' | trans}}</button>";
 	module.exports = {
 
 	    props: [],
@@ -27367,8 +27381,8 @@
 	            badgeClass: '',
 	            badgeMessage: '',
 	            confirmClear: {
-	                t: 'Design wissen',
-	                m: 'Weet u zeker dat u dit design wilt wissen?'
+	                t: 'Project wissen',
+	                m: 'Weet u zeker dat u dit project wilt wissen?'
 	            }
 	        };
 	    },
@@ -27389,7 +27403,7 @@
 
 	        this.$on('saved.bps.state', function () {
 	            this.badgeClass = 'uk-badge-success';
-	            this.badgeMessage = this.$trans('Design opgeslagen');
+	            this.badgeMessage = this.$trans('Project opgeslagen');
 	            setTimeout(this.clearBadge, 1200);
 	        }.bind(this));
 

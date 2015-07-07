@@ -74,16 +74,14 @@
         methods: {
             exportImage: function () {
 
-                this.canvas.discardActiveGroup();
-                this.canvas.discardActiveObject();
+                this.deactivateCanvas();
 
                 return this.canvas.toDataURL();
 
             },
             exportDesign: function (e) {
 
-                this.canvas.discardActiveGroup();
-                this.canvas.discardActiveObject();
+                this.deactivateCanvas();
 
                 this.spinning = true;
                 this.$set('pdf_path', '');

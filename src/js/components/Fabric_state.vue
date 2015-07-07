@@ -4,8 +4,8 @@
     </div>
 
     <button type="button" class="uk-button"
-            v-confirm="clearCanvas: confirmClear">
-        <i class="uk-icon-times uk-margin-small-right"></i>{{ 'Wis design' | trans}}</button>
+            v-confirm="clearProjectButton: confirmClear">
+        <i class="uk-icon-times uk-margin-small-right"></i>{{ 'Wis project' | trans}}</button>
 
 </template>
 
@@ -22,8 +22,8 @@ module.exports = {
             badgeClass: '',
             badgeMessage: '',
             confirmClear: {
-                t: 'Design wissen',
-                m: 'Weet u zeker dat u dit design wilt wissen?'
+                t: 'Project wissen',
+                m: 'Weet u zeker dat u dit project wilt wissen?'
             }
         };
     },
@@ -43,13 +43,23 @@ module.exports = {
         }.bind(this));
 
         this.$on('saved.bps.state', function () {
-            this.badgeClass = 'uk-badge-success';
-            this.badgeMessage = this.$trans('Design opgeslagen');
-            setTimeout(this.clearBadge, 1200);
+            this.setBadge('Project opgeslagen', 'uk-badge-success');
         }.bind(this));
 
     },
      methods: {
+         clearProjectButton: function () {
+             this.deactivateCanvas();
+             this.$localstorage(this.bixConfig.prefix + '.activeDesign', '');
+             this.$localstorage.remove(this.bixConfig.prefix + '.' + this.projectID);
+             this.clearProject();
+             this.setBadge('Project verwijderd', 'uk-badge-warning');
+         },
+         setBadge: function (message, cls) {
+             this.badgeMessage = this.$trans(message);
+             this.badgeClass = cls;
+             setTimeout(this.clearBadge, 1200);
+         },
          clearBadge: function () {
              this.badgeClass = '';
              this.badgeMessage = '';
